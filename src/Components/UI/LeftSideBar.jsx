@@ -1,8 +1,9 @@
-import { Dot, Plus, Trash2 } from "lucide-react";
+import { Dot, Plus, ShieldAlert, Trash2 } from "lucide-react";
 import { HEAD, LINE, MUTE, PANEL, PAPER } from "../../Utils/UIElements";
 import { MODES } from "../../Utils/Modes";
 import { focus } from "../../TailwindElements/tailwindClass";
 import { Button } from "./Button";
+import ShuttapyMascot from "./ShuttapyMascot";
 
 function LeftSideBar({
   chats,
@@ -11,27 +12,106 @@ function LeftSideBar({
   createNewChat,
   mode,
   setMode,
+  setShowConfirmation,
+  showConfirmation,
 }) {
   return (
     <>
-      {" "}
       {/* LEFT SIDEBAR */}
       <aside
         className={`
           hidden flex-col gap-3 overflow-auto
-          border-r p-3 md:flex
+          border-r p-2 md:flex custom-scrollbar
           ${PANEL}
           ${LINE}
         `}
       >
         <div
           className={`
-            flex items-center gap-2.5 px-1
+            flex items-center justify-center border-b-2
             text-[25px]
             ${HEAD}
           `}
         >
-          Shuttapy
+          <ShuttapyMascot size={80} />
+          <span className="pr-6"> Shuttapy </span>
+        </div>
+        {/* VISUAL CONFIRMATION BUTTON */}
+
+        <div className="m-1">
+          <Button
+            onClick={() => setShowConfirmation((current) => !current)}
+            className={`w-full
+            ${focus} flex justify-center
+          `}
+          >
+            {showConfirmation
+              ? "Hide confirmation preview"
+              : "Preview confirmation UI"}
+          </Button>
+
+          {showConfirmation && (
+            <div
+              className={`
+              mt-3 rounded-2xl
+              border-2
+              border-[#FFD43B]
+              p-3
+              ${PANEL}
+            `}
+            >
+              <div
+                className="
+                flex items-center
+                gap-2 text-[13px]
+                font-medium
+              "
+              >
+                <ShieldAlert size={16} className="text-amber-500" />
+                Agent permission required
+              </div>
+
+              <p
+                className={`
+                mt-2 text-[12px]
+                leading-relaxed
+                ${MUTE}
+              `}
+              >
+                The agent wants to perform an action on your computer.
+              </p>
+
+              <div
+                className="
+                mt-2 flex gap-2
+              "
+              >
+                <button
+                  onClick={() => setShowConfirmation(false)}
+                  className="
+                  rounded-full
+                  bg-violet-600
+                  px-3 py-1
+                  text-xs text-white
+                "
+                >
+                  Allow
+                </button>
+
+                <button
+                  onClick={() => setShowConfirmation(false)}
+                  className={`
+                  rounded-full
+                  border px-3 py-1
+                  text-xs
+                  ${LINE}
+                `}
+                >
+                  Deny
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* MODES */}
@@ -78,21 +158,26 @@ function LeftSideBar({
         </button>
 
         {/* CHAT LIST */}
+        <div>
+          <p className="mt-4 mb-2 flex">
+            <Dot /> History
+          </p>
 
-        <div
-          aria-label="Chats"
-          className="
+          <div
+            aria-label="Chats"
+            className=" max-h-48
             flex min-h-0 flex-col gap-0.5
             overflow-auto
+            custom-scrollbar
           "
-        >
-     <p className="mt-4 flex"><Dot/> History</p> 
-          {chats.map((currentChat) => (
-            <div
-              key={currentChat.id}
-              aria-current={currentChat.id === chat.id}
-              onClick={() => setActiveId(currentChat.id)}
-              className={`
+          >
+            <div>
+              {chats.map((currentChat) => (
+                <div
+                  key={currentChat.id}
+                  aria-current={currentChat.id === chat.id}
+                  onClick={() => setActiveId(currentChat.id)}
+                  className={`
                 truncate rounded-lg
                 px-2.5 py-1.5
                 text-left text-[13.5px]
@@ -100,15 +185,15 @@ function LeftSideBar({
                 ${focus}
                 ${currentChat.id === chat.id ? `${PAPER} text-inherit` : MUTE}
               `}
-            >
-              <div>
-                {currentChat.title}
-              </div>
-              <Button className="text-center p-1 m-0 ">
-                <Trash2 className="size-4" />
-              </Button>
+                >
+                  <div>{currentChat.title}</div>
+                  <Button className="text-center p-1 m-0 ">
+                    <Trash2 className="size-4" />
+                  </Button>
+                </div>
+              ))}
             </div>
-          ))}
+          </div>
         </div>
       </aside>
     </>

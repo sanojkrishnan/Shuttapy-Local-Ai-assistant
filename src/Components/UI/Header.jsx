@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { MODES } from "../../Utils/Modes";
 import { HEAD, LINE, MUTE, PANEL } from "../../Utils/UIElements";
+import { TriangleAlert } from "lucide-react";
 
 function Header({ mode, setMode, DefaultMode }) {
+  const [GPUConnected, setGPUConnected] = useState(false);
   const [live] = useState(true); //live is a state that indicates if the local AI agent is running or not. It is set to true for the demo version of this app.
   return (
     <>
@@ -57,6 +59,21 @@ function Header({ mode, setMode, DefaultMode }) {
               `}
           />
           Local AI
+        </span>
+
+        <span
+          className={`flex rounded-xl border border-amber-100 p-1 px-2 items-center gap-1.5 text-[12px] font-semibold ${
+            GPUConnected ? "animate-pulse bg-red-500" : "opacity-30"
+          }`}
+        >
+          {GPUConnected ? (
+            <span className="flex gap-1.5">
+              <TriangleAlert size={16} />
+              External GPU on
+            </span>
+          ) : (
+            "External GPU off"
+          )}
         </span>
       </header>
     </>

@@ -1,0 +1,201 @@
+/* =========================================
+   SHUTTAPY MASCOT
+
+*/
+
+.shuttapy-mascot {
+  --size: 320px;
+  --look-x: 0;
+  --look-y: 0;
+  --look-gain: 1;
+
+  width: var(--size);
+  aspect-ratio: 688 / 595;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform-origin: center bottom;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.shuttapy-svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.shuttapy-character,
+.shuttapy-head-group,
+.shuttapy-face,
+.shuttapy-eye,
+.shuttapy-mouth {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.shuttapy-character {
+  transform-origin: 50% 100%; /* squash & stretch from the "ground" */
+  transition:
+    translate 0.35s ease,
+    scale 0.35s ease;
+}
+
+.shuttapy-head-group {
+  translate: calc(var(--look-x) * var(--look-gain) * 0.3px)
+    calc(var(--look-y) * var(--look-gain) * 0.3px);
+  transition:
+    translate 0.18s ease-out,
+    rotate 0.35s ease;
+}
+
+.shuttapy-face {
+  translate: calc(var(--look-x) * var(--look-gain) * 0.6px)
+    calc(var(--look-y) * var(--look-gain) * 0.6px);
+  transition: translate 0.14s ease-out;
+}
+
+.shuttapy-eye {
+  translate: calc(var(--look-x) * var(--look-gain) * 0.5px)
+    calc(var(--look-y) * var(--look-gain) * 0.5px);
+  transition:
+    translate 0.14s ease-out,
+    scale 0.09s ease;
+}
+
+.shuttapy-mouth {
+  transition: scale 0.25s ease;
+}
+
+.shuttapy-head {
+  fill: rgb(252, 204, 204);
+}
+.shuttapy-eye,
+.shuttapy-mouth {
+  fill: rgb(20, 18, 43);
+}
+
+/* how much the face follows the cursor, per state */
+.state-responding {
+  --look-gain: 0.5;
+}
+.state-wake,
+.state-thinking,
+.state-processing,
+.state-error {
+  --look-gain: 0;
+}
+
+/* ---------- IDLE ---------- */
+.state-idle .shuttapy-character {
+  animation: sh-float 4s ease-in-out infinite;
+}
+.state-idle .shuttapy-head-group {
+  animation: sh-sway 7s ease-in-out infinite;
+}
+.state-idle .shuttapy-mouth {
+  animation: sh-breathe 4s ease-in-out infinite;
+}
+
+/* ---------- WAKE ---------- */
+.state-wake .shuttapy-character {
+  animation: sh-wake-body 1.1s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.state-wake .shuttapy-head-group {
+  animation: sh-wake-head 1.1s ease-out both;
+}
+.state-wake .shuttapy-eye {
+  animation: sh-wake-eyes 1.1s ease-out both;
+}
+.state-wake .shuttapy-mouth {
+  animation: sh-wake-mouth 1.1s ease-out both;
+}
+
+/* ---------- LISTENING (user is typing / mic open) ---------- */
+.state-listening .shuttapy-character {
+  translate: 0 8px;
+  scale: 1.04;
+  animation: sh-listen-body 2.6s ease-in-out infinite;
+}
+.state-listening .shuttapy-head-group {
+  rotate: 4deg;
+}
+.state-listening .shuttapy-eye {
+  scale: 1.12;
+}
+
+/* ---------- THINKING (waiting for the model) ---------- */
+.state-thinking .shuttapy-character {
+  animation: sh-think-body 2s ease-in-out infinite;
+}
+.state-thinking .shuttapy-head-group {
+  rotate: -4deg;
+  animation: sh-think-head 2s ease-in-out infinite;
+}
+.state-thinking .shuttapy-eye {
+  animation: sh-think-eyes 2.4s ease-in-out infinite;
+}
+.state-thinking .shuttapy-mouth {
+  animation: sh-think-mouth 2s ease-in-out infinite;
+}
+
+/* ---------- PROCESSING (tools / PC / browser running) ---------- */
+.state-processing .shuttapy-character {
+  animation: sh-process-body 0.7s ease-in-out infinite;
+}
+.state-processing .shuttapy-eye {
+  animation: sh-process-eyes 1s ease-in-out infinite;
+}
+.state-processing .shuttapy-mouth {
+  scale: 0.9 0.65;
+}
+
+/* ---------- RESPONDING (streaming tokens) ---------- */
+.state-responding .shuttapy-character {
+  animation: sh-float 2.4s ease-in-out infinite;
+}
+.state-responding .shuttapy-head-group {
+  animation: sh-nod 1.6s ease-in-out infinite;
+}
+.state-responding .shuttapy-mouth {
+  animation: sh-talk 0.9s ease-in-out infinite;
+}
+
+/* ---------- SUCCESS ---------- */
+.state-success .shuttapy-character {
+  animation: sh-bounce 0.75s ease-out;
+}
+.state-success .shuttapy-eye {
+  scale: 1.1 0.75;
+}
+.state-success .shuttapy-mouth {
+  scale: 1.2;
+}
+
+/* ---------- ERROR ---------- */
+.state-error .shuttapy-character {
+  animation: sh-shake 0.65s ease-in-out;
+}
+.state-error .shuttapy-eye {
+  scale: 1 0.65;
+}
+.state-error .shuttapy-mouth {
+  scale: 1 -0.8;
+} /* flips the smile into a frown */
+
+/* ---------- POKE (click, works in any state) ---------- */
+.shuttapy-mascot.is-poked {
+  animation: sh-poke 0.5s ease-out;
+}
+.is-poked .shuttapy-eye {
+  scale: 1 0.3;
+}
+.is-poked .shuttapy-mouth {
+  scale: 1.2;
+}
+
+/* ---------- BLINK (must stay last so it wins) ---------- */
+.is-blinking .shuttapy-eye {
+  scale: 1 0.08;
+}

@@ -7,14 +7,24 @@ import {
   MUTE,
   PANEL,
   PERMS,
-  SEL,
 } from "../../Utils/UIElements";
-import { Activity, Brain, Lock, ShieldAlert, ShieldCheck } from "lucide-react";
+import {
+  Activity,
+  Brain,
+  ChevronDown,
+  Laptop,
+  ShieldCheck,
+} from "lucide-react";
 import { DEMO_MEMORIES, DEMO_TRACE } from "../../Utils/Demo";
-import { focus } from "../../TailwindElements/tailwindClass";
+import SystemStats from "./SystemStatus";
+import GlobalGpuPanel from "./GlobalGpuPanel";
+import Dropdown from "./DropDown";
 
-function RightSideBar({ showConfirmation, setShowConfirmation }) {
+function RightSideBar() {
   const [perms, setPerms] = useState(DEFAULT_PERMS);
+  const [permissionOpen, setPermissionOpen] = useState(false);
+  const [activityOpen, setActivityOpen] = useState(false);
+  const [memoryOpen, setMemoryOpen] = useState(false);
   const [trace] = useState(DEMO_TRACE);
   const [memories] = useState(DEMO_MEMORIES);
 
@@ -24,6 +34,7 @@ function RightSideBar({ showConfirmation, setShowConfirmation }) {
       <aside
         aria-label="Activity"
         className={`
+          custom-scrollbar
           hidden flex-col
           overflow-auto
           border-l p-4
@@ -36,172 +47,194 @@ function RightSideBar({ showConfirmation, setShowConfirmation }) {
 
         <section
           className={`
-            border-t py-4
+            border-t ${activityOpen && "py-4"}
             first:border-t-0
             first:pt-0
             ${LINE}
           `}
         >
-          <h2
+          <button
+            onClick={() => setActivityOpen((prev) => !prev)}
             className={`
-              mb-2 flex items-center
+              py-4 w-full flex items-center justify-between
               gap-2 text-[15px]
               ${HEAD}
             `}
           >
-            <Activity size={16} />
-            Activity
-          </h2>
-
-          {used && (
-            <p
+            <h2
               className={`
+             flex gap-2 items-center
+              ${HEAD}
+            `}
+            >
+              <Activity size={16} />
+              Activity
+            </h2>
+            <ChevronDown
+              size={22}
+              aria-hidden="true"
+              className={`transition-transform duration-200 ${activityOpen ? "rotate-180" : ""}`}
+            />
+          </button>
+          <div className={`${activityOpen ? "block" : "hidden"}`}>
+            {used && (
+              <p
+                className={`
                 mb-1.5 text-[13px]
                 ${MUTE}
               `}
-            >
-              Model: {used}
-            </p>
-          )}
+              >
+                Model: {used}
+              </p>
+            )}
 
-          {trace.length === 0 ? (
-            <p
-              className={`
+            {trace.length === 0 ? (
+              <p
+                className={`
                 text-[13px]
                 leading-snug
                 ${MUTE}
               `}
-            >
-              The plan and tool activity will appear here while the local AI
-              agent works.
-            </p>
-          ) : (
-            <ul
-              className="
+              >
+                The plan and tool activity will appear here while the local AI
+                agent works.
+              </p>
+            ) : (
+              <ul
+                className="
                 grid list-none
                 gap-2 p-0 text-sm
               "
-            >
-              {trace.map((item) => (
-                <li
-                  key={item.id}
-                  className="
+              >
+                {trace.map((item) => (
+                  <li
+                    key={item.id}
+                    className="
                     flex items-center
                     gap-2.5
                   "
-                >
-                  <span
-                    className={`
+                  >
+                    <span
+                      className={`
                       h-2.5 w-2.5
                       shrink-0 rounded-full
                       ${DOT[item.status]}
                     `}
-                  />
+                    />
 
-                  {item.label}
-                </li>
-              ))}
-            </ul>
-          )}
+                    {item.label}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
         </section>
 
         {/* MEMORY */}
 
         <section
           className={`
-            border-t py-4
+            border-t ${memoryOpen && "pb-4"}
             ${LINE}
           `}
         >
-          <h2
+          <button
+            onClick={() => setMemoryOpen((prev) => !prev)}
             className={`
-              mb-2 flex items-center
+              py-4 w-full flex items-center justify-between
               gap-2 text-[15px]
               ${HEAD}
             `}
           >
-            <Brain size={16} />
-            Memory
-          </h2>
-
-          {memories.length === 0 ? (
-            <p
+            <h2
               className={`
+             flex gap-2 items-center
+              ${HEAD}
+            `}
+            >
+              <Brain size={16} />
+              Memory
+            </h2>
+            <ChevronDown
+              size={22}
+              aria-hidden="true"
+              className={`transition-transform duration-200 ${memoryOpen ? "rotate-180" : ""}`}
+            />
+          </button>
+          <div className={`${memoryOpen ? "block" : "hidden"}`}>
+            {memories.length === 0 ? (
+              <p
+                className={`
                 text-[13px]
                 leading-snug
                 ${MUTE}
               `}
-            >
-              Saved memories will appear here.
-            </p>
-          ) : (
-            <ul
-              className="
+              >
+                Saved memories will appear here.
+              </p>
+            ) : (
+              <ul
+                className="
                 grid list-none
                 gap-2 p-0 text-sm
               "
-            >
-              {memories.map((memory, index) => (
-                <li key={index}>{memory}</li>
-              ))}
-            </ul>
-          )}
+              >
+                {memories.map((memory, index) => (
+                  <li key={index}>{memory}</li>
+                ))}
+              </ul>
+            )}
+          </div>
         </section>
 
         {/* PERMISSIONS */}
 
         <section
           className={`
-            border-t py-4
+            border-t ${permissionOpen && "pb-4"}
             ${LINE}
           `}
         >
-          <h2
+          <button
+            onClick={() => setPermissionOpen((prev) => !prev)}
             className={`
-              mb-2 flex items-center
+              py-4 w-full flex items-center justify-between
               gap-2 text-[15px]
               ${HEAD}
             `}
           >
-            <ShieldCheck size={16} />
-            Permissions
-          </h2>
+            <h2 className="flex gap-2 items-center">
+              <ShieldCheck size={16} />
+              Permissions
+            </h2>
+            <ChevronDown
+              size={22}
+              aria-hidden="true"
+              className={`transition-transform duration-200 ${permissionOpen ? "rotate-180" : ""}`}
+            />
+          </button>
 
-          {PERMS.map(([key, label]) => (
-            <label
-              key={key}
-              className="
+          <div className={`${permissionOpen ? "block" : "hidden"}`}>
+            {PERMS.map(([key, label]) => (
+              <label
+                key={key}
+                className="
                   mb-2 flex
                   items-center
                   justify-between
                   gap-2
                   text-[13.5px]
                 "
-            >
-              {label}
-
-              <select
-                value={perms[key]}
-                onChange={(event) =>
-                  setPerms((current) => ({
-                    ...current,
-                    [key]: event.target.value,
-                  }))
-                }
-                className={SEL}
               >
-                <option value="allow">Allow</option>
+                {label}
 
-                <option value="ask">Ask first</option>
-
-                <option value="off">Off</option>
-              </select>
-            </label>
-          ))}
-
+                <Dropdown buttonClass={"py-1"} className="" align="right" />
+              </label>
+            ))}
+          </div>
           {/* ALWAYS ASK DELETE */}
 
-          <label
+          {/* <label
             className="
               mb-2 flex
               items-center
@@ -223,88 +256,31 @@ function RightSideBar({ showConfirmation, setShowConfirmation }) {
             <select disabled className={SEL}>
               <option>Always ask</option>
             </select>
-          </label>
+          </label> */}
         </section>
-
-        {/* VISUAL CONFIRMATION BUTTON */}
-
-        <button
-          onClick={() => setShowConfirmation((current) => !current)}
+        <section
           className={`
-            mt-3 rounded-xl
-            border px-3 py-2
-            text-left text-[13px]
+            border-t py-4
             ${LINE}
-            ${focus}
           `}
         >
-          {showConfirmation
-            ? "Hide confirmation preview"
-            : "Preview confirmation UI"}
-        </button>
-
-        {showConfirmation && (
-          <div
+          <h2
             className={`
-              mt-3 rounded-2xl
-              border-2
-              border-[#FFD43B]
-              p-3
-              ${PANEL}
+              mb-2 flex items-center
+              gap-2 text-[15px]
+              ${HEAD}
             `}
           >
-            <div
-              className="
-                flex items-center
-                gap-2 text-[13px]
-                font-medium
-              "
-            >
-              <ShieldAlert size={16} className="text-amber-500" />
-              Agent permission required
-            </div>
-
-            <p
-              className={`
-                mt-2 text-[12px]
-                leading-relaxed
-                ${MUTE}
-              `}
-            >
-              The agent wants to perform an action on your computer.
-            </p>
-
-            <div
-              className="
-                mt-2 flex gap-2
-              "
-            >
-              <button
-                onClick={() => setShowConfirmation(false)}
-                className="
-                  rounded-full
-                  bg-violet-600
-                  px-3 py-1
-                  text-xs text-white
-                "
-              >
-                Allow
-              </button>
-
-              <button
-                onClick={() => setShowConfirmation(false)}
-                className={`
-                  rounded-full
-                  border px-3 py-1
-                  text-xs
-                  ${LINE}
-                `}
-              >
-                Deny
-              </button>
-            </div>
+            <Laptop size={16} />
+            Resources
+          </h2>
+          <div className="mb-4">
+            <GlobalGpuPanel />
           </div>
-        )}
+          <div className="mb-4">
+            <SystemStats />
+          </div>
+        </section>
       </aside>
     </>
   );

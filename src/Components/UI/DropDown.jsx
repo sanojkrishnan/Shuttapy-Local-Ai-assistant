@@ -8,6 +8,7 @@ export default function Dropdown({
   align = "left",
   openUp = false,
   className = "",
+  buttonClass,
 }) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef(null),
@@ -99,6 +100,7 @@ export default function Dropdown({
         </div>
 
         <Button
+          className={buttonClass}
           ref={btnRef}
           type="button"
           id={`${id}-btn`}

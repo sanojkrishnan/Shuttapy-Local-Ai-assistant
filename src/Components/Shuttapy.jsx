@@ -10,7 +10,8 @@ export default function Shuttapy() {
   //states
   const [showConfirmation, setShowConfirmation] = useState(false);
 
-  const { chats, setActiveId, chat, createNewChat } = useChatFinder(); //chat finder hook to manage chats and active chat
+  const { chats, setActiveId, chat, createNewChat, addMessages } =
+    useChatFinder(); //chat finder hook to manage chats and active chat
 
   const { DefaultMode, mode, setMode } = useMode(); //mode hook to manage the current mode of the app
 
@@ -22,7 +23,7 @@ export default function Shuttapy() {
         text-[#1D1A3B]
         dark:text-[#EEEBFF]
         md:grid-cols-[236px_1fr]
-        xl:grid-cols-[236px_1fr_288px]
+        xl:grid-cols-[288px_1fr_288px]
         ${PAPER}
       `}
     >
@@ -43,6 +44,8 @@ export default function Shuttapy() {
         createNewChat={createNewChat}
         mode={mode}
         setMode={setMode}
+        showConfirmation={showConfirmation}
+        setShowConfirmation={setShowConfirmation}
       />
 
       {/* CENTER */}
@@ -51,6 +54,7 @@ export default function Shuttapy() {
         setMode={setMode}
         DefaultMode={DefaultMode}
         chat={chat}
+        addMessages={addMessages}
         setShowConfirmation={setShowConfirmation}
       />
 

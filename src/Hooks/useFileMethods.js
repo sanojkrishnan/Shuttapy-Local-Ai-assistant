@@ -1,11 +1,8 @@
 import { useState } from "react";
-import useChatFinder from "./useChatFinder";
 
-export default function useFileMethods() {
+export default function useFileMethods({ addMessages }) {
   const [files, setFiles] = useState([]);
   const [text, setText] = useState("");
-
-  const { setChats, activeId } = useChatFinder();
 
   function handleFileSelect(event) {
     setFiles([...event.target.files]);
@@ -16,44 +13,21 @@ export default function useFileMethods() {
   }
 
   function handleSend() {
-    if (!text.trim()) return;
+    const content = text.trim();
+    if (!content) return;
 
-    const userMessage = {
-      role: "user",
-      content: text.trim(),
-    };
-
-    setChats((current) =>
-      current.map((c) =>
-        c.id === activeId
-          ? {
-              ...c,
-              title:
-                c.messages.length === 0 ? text.trim().slice(0, 30) : c.title,
-              messages: [
-                ...c.messages,
-                userMessage,
-                {
-                  role: "assistant",
-                  content:
-                    "This is the UI-only version of Shuttapy. Your local AI agent will handle this response here.",
-                },
-              ],
-            }
-          : c,
-      ),
-    );
+    addMessages([
+      { role: "user", content },
+      {
+        role: "assistant",
+        content:
+          "This is the UI-only version of Shuttapy. Your local AI agent will handle this response here.",
+      },
+    ]);
 
     setText("");
     setFiles([]);
   }
 
-  return {
-    handleFileSelect,
-    removeFile,
-    handleSend,
-    files,
-    text,
-    setText,
-  };
+  return { handleFileSelect, removeFile, handleSend, files, text, setText };
 }

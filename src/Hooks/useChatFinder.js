@@ -21,6 +21,25 @@ export default function useChatFinder() {
     setActiveId(newChat.id);
   }
 
+  function addMessages(newMessages) {
+    const targetId = chat?.id; // `chat` already falls back to chats[0]
+
+    setChats((current) =>
+      current.map((c) =>
+        c.id === targetId
+          ? {
+              ...c,
+              title:
+                c.messages.length === 0
+                  ? newMessages[0].content.slice(0, 30)
+                  : c.title,
+              messages: [...c.messages, ...newMessages],
+            }
+          : c,
+      ),
+    );
+  }
+
   return {
     chats,
     setChats,
@@ -28,5 +47,6 @@ export default function useChatFinder() {
     setActiveId,
     chat,
     createNewChat,
+    addMessages,
   };
 }
