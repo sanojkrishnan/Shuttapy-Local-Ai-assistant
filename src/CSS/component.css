@@ -64,6 +64,11 @@
     scale 0.09s ease;
 }
 
+.bellRing {
+  animation: bellRing 0.8s ease-in-out;
+  transform-origin: top center; /* swing from the top, like a real bell */
+}
+
 .shuttapy-mouth {
   transition: scale 0.25s ease;
 }

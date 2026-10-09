@@ -4,6 +4,7 @@ import { MODES } from "../../Utils/Modes";
 import { focus } from "../../TailwindElements/tailwindClass";
 import { Button } from "./Button";
 import ShuttapyMascot from "./ShuttapyMascot";
+import BellButton from "./BellButton";
 
 function LeftSideBar({
   chats,
@@ -20,10 +21,11 @@ function LeftSideBar({
       {/* LEFT SIDEBAR */}
       <aside
         className={`
-          hidden flex-col gap-3 overflow-auto
-          border-r p-2 md:flex custom-scrollbar
-          ${PANEL}
-          ${LINE}
+          relative z-20
+    hidden flex-col gap-3 overflow-auto
+    border-r p-2 md:flex custom-scrollbar
+    ${PANEL}
+    ${LINE}
         `}
       >
         <div
@@ -38,80 +40,11 @@ function LeftSideBar({
         </div>
         {/* VISUAL CONFIRMATION BUTTON */}
 
-        <div className="m-1">
-          <Button
-            onClick={() => setShowConfirmation((current) => !current)}
-            className={`w-full
-            ${focus} flex justify-center
-          `}
-          >
-            {showConfirmation
-              ? "Hide confirmation preview"
-              : "Preview confirmation UI"}
-          </Button>
-
-          {showConfirmation && (
-            <div
-              className={`
-              mt-3 rounded-2xl
-              border-2
-              border-[#FFD43B]
-              p-3
-              ${PANEL}
-            `}
-            >
-              <div
-                className="
-                flex items-center
-                gap-2 text-[13px]
-                font-medium
-              "
-              >
-                <ShieldAlert size={16} className="text-amber-500" />
-                Agent permission required
-              </div>
-
-              <p
-                className={`
-                mt-2 text-[12px]
-                leading-relaxed
-                ${MUTE}
-              `}
-              >
-                The agent wants to perform an action on your computer.
-              </p>
-
-              <div
-                className="
-                mt-2 flex gap-2
-              "
-              >
-                <button
-                  onClick={() => setShowConfirmation(false)}
-                  className="
-                  rounded-full
-                  bg-violet-600
-                  px-3 py-1
-                  text-xs text-white
-                "
-                >
-                  Allow
-                </button>
-
-                <button
-                  onClick={() => setShowConfirmation(false)}
-                  className={`
-                  rounded-full
-                  border px-3 py-1
-                  text-xs
-                  ${LINE}
-                `}
-                >
-                  Deny
-                </button>
-              </div>
-            </div>
-          )}
+        <div className="m-1 flex justify-end">
+          <BellButton
+            showConfirmation={showConfirmation}
+            setShowConfirmation={setShowConfirmation}
+          />
         </div>
 
         {/* MODES */}

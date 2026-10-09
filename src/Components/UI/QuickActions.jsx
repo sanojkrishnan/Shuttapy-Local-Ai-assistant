@@ -10,6 +10,7 @@ function QuickActions({ DefaultMode, setText }) {
                 pb-2.5
                 mb-1.5
                 custom-scrollbar
+                mr-15
               "
       >
         {DefaultMode.actions.map((action) => (

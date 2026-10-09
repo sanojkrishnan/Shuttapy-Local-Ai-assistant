@@ -3,9 +3,6 @@ import {
   Area,
   AreaChart,
   CartesianGrid,
-  PolarAngleAxis,
-  RadialBar,
-  RadialBarChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -16,14 +13,21 @@ import {
   Cloud,
   ShieldCheck,
   ShieldOff,
-  Thermometer,
   Wallet,
   Wifi,
-  Zap,
 } from "lucide-react";
 import { LINE, PANEL } from "../../Utils/UIElements";
-import useMockRentedGpu, { GPU_OPTIONS } from "../../Hooks/useMockRentedGpu";
+import { GPU_OPTIONS } from "../../Hooks/useMockRentedGpu";
 import { Button } from "./Button";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  selectGpu,
+  selectGpuReadings,
+  selectGpuStatus,
+  selectPermitted,
+  selectSelectedGpu,
+  setPermitted,
+} from "../../redux/slice/gpuSlice";
 
 const C = {
   violet: "#8b5cf6",
@@ -141,48 +145,6 @@ function PermissionControl({ permitted, onChange, rate }) {
   );
 }
 
-/* ---------- utilisation ring ---------- */
-function UtilRing({ value }) {
-  const pct = Math.round(value);
-  return (
-    <div
-      className="relative h-[92px] w-[92px] shrink-0"
-      role="meter"
-      aria-label="Global GPU utilisation"
-      aria-valuenow={pct}
-      aria-valuemin={0}
-      aria-valuemax={100}
-    >
-      <ResponsiveContainer width="100%" height="100%">
-        <RadialBarChart
-          data={[{ value: pct, fill: levelColor(pct) }]}
-          innerRadius="76%"
-          outerRadius="100%"
-          startAngle={90}
-          endAngle={-270}
-          barSize={9}
-        >
-          <PolarAngleAxis type="number" domain={[0, 100]} tick={false} />
-          <RadialBar
-            dataKey="value"
-            background={{ fill: C.track }}
-            cornerRadius={10}
-            animationDuration={600}
-          />
-        </RadialBarChart>
-      </ResponsiveContainer>
-      <div className="pointer-events-none absolute inset-0 grid place-items-center text-center leading-none">
-        <div>
-          <div className="text-lg font-semibold tabular-nums">{pct}%</div>
-          <div className="mt-0.5 text-[9px] uppercase tracking-wide opacity-60">
-            util
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 /* ---------- small stat cell ---------- */
 function Stat({ icon: Icon, label, value }) {
   return (
@@ -240,8 +202,13 @@ function GpuSelector({ options, value, onChange, locked }) {
 
 /* ---------- panel ---------- */
 export default function GlobalGpuPanel() {
-  const { gpu, permitted, setPermitted, status, rate, selected, selectGpu } =
-    useMockRentedGpu();
+  const dispatch = useDispatch();
+  const permitted = useSelector(selectPermitted);
+  const gpu = useSelector(selectGpuReadings);
+  const selected = useSelector(selectSelectedGpu);
+  const status = useSelector(selectGpuStatus);
+  const rate = selected.rate;
+
   const vramPct = (gpu.vram / selected.vramTotal) * 100;
 
   return (
@@ -262,14 +229,14 @@ export default function GlobalGpuPanel() {
       {/* permission */}
       <PermissionControl
         permitted={permitted}
-        onChange={setPermitted}
+        onChange={(v) => dispatch(setPermitted(v))}
         rate={rate}
       />
       <div className={`mt-2 ${permitted ? "block" : "hidden"}`}>
         <GpuSelector
           options={GPU_OPTIONS}
           value={selected.id}
-          onChange={selectGpu}
+          onChange={(id) => dispatch(selectGpu(id))}
           locked={status === "active"}
         />
       </div>

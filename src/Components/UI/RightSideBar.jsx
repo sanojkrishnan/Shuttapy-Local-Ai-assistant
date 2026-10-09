@@ -56,7 +56,7 @@ function RightSideBar() {
           <button
             onClick={() => setActivityOpen((prev) => !prev)}
             className={`
-              py-4 w-full flex items-center justify-between
+              py-4 w-full flex items-center justify-between cursor-pointer
               gap-2 text-[15px]
               ${HEAD}
             `}
@@ -141,7 +141,7 @@ function RightSideBar() {
           <button
             onClick={() => setMemoryOpen((prev) => !prev)}
             className={`
-              py-4 w-full flex items-center justify-between
+              py-4 w-full flex items-center justify-between cursor-pointer
               gap-2 text-[15px]
               ${HEAD}
             `}
@@ -198,7 +198,7 @@ function RightSideBar() {
           <button
             onClick={() => setPermissionOpen((prev) => !prev)}
             className={`
-              py-4 w-full flex items-center justify-between
+              py-4 w-full flex items-center justify-between cursor-pointer
               gap-2 text-[15px]
               ${HEAD}
             `}

@@ -1,19 +1,20 @@
-import { LINE, MUTE, PANEL } from '../../Utils/UIElements';
-import Iris from './Iris';
-import { Button } from './Button';
-import { ShieldAlert } from 'lucide-react';
+import { LINE, MUTE, PANEL } from "../../Utils/UIElements";
+import Iris from "./Iris";
+import { Button } from "./Button";
+import { ShieldAlert } from "lucide-react";
 
-function Messages({chat, setShowConfirmation}) {  //messages component is responsible for rendering the chat messages in the UI. It takes in the chat object and a function to set the showConfirmation state as props.
+function Messages({ chat, setShowConfirmation }) {
+  //messages component is responsible for rendering the chat messages in the UI. It takes in the chat object and a function to set the showConfirmation state as props.
   return (
     <>
-    {chat.messages.map((message, index) => {
-              if (message.role === "confirm") {
-                return (
-                  <div
-                    key={index}
-                    role="alertdialog"
-                    aria-label="Confirm action"
-                    className={`
+      {chat.messages.map((message, index) => {
+        if (message.role === "confirm") {
+          return (
+            <div
+              key={index}
+              role="alertdialog"
+              aria-label="Confirm action"
+              className={`
                         ml-9.5
                         grid max-w-130
                         gap-2 rounded-2xl
@@ -22,36 +23,36 @@ function Messages({chat, setShowConfirmation}) {  //messages component is respon
                         p-3.5
                         ${PANEL}
                       `}
-                  >
-                    <b
-                      className="
+            >
+              <b
+                className="
                           flex items-center
                           gap-2 text-[15px]
                         "
-                    >
-                      <ShieldAlert size={18} className="text-amber-500" />
-                      Allow this action?
-                    </b>
+              >
+                <ShieldAlert size={18} className="text-amber-500" />
+                Allow this action?
+              </b>
 
-                    <code
-                      className={`
+              <code
+                className={`
                           break-all
                           text-[13px]
                           ${MUTE}
                         `}
-                    >
-                      The local AI agent is requesting permission to perform an
-                      action.
-                    </code>
+              >
+                The local AI agent is requesting permission to perform an
+                action.
+              </code>
 
-                    <div
-                      className="
+              <div
+                className="
                           flex gap-2
                         "
-                    >
-                      <Button
-                        onClick={() => setShowConfirmation(false)}
-                        className={`
+              >
+                <Button
+                  onClick={() => setShowConfirmation(false)}
+                  className={`
                             rounded-full
                             bg-violet-600
                             px-4 py-1.5
@@ -59,40 +60,40 @@ function Messages({chat, setShowConfirmation}) {  //messages component is respon
                             hover:bg-violet-700
                             ${focus}
                           `}
-                      >
-                        Allow once
-                      </Button>
+                >
+                  Allow once
+                </Button>
 
-                      <button
-                        onClick={() => setShowConfirmation(false)}
-                        className={`
+                <button
+                  onClick={() => setShowConfirmation(false)}
+                  className={`
                             rounded-full
                             border px-4 py-1.5
                             ${LINE}
                             ${focus}
                           `}
-                      >
-                        Don't do it
-                      </button>
-                    </div>
-                  </div>
-                );
-              }
+                >
+                  Don't do it
+                </button>
+              </div>
+            </div>
+          );
+        }
 
-              const isUser = message.role === "user";
+        const isUser = message.role === "user";
 
-              return (
-                <div
-                  key={index}
-                  className={`
+        return (
+          <div
+            key={index}
+            className={`
                       flex items-start gap-2.5
                       ${isUser ? "justify-end" : ""}
                     `}
-                >
-                  {!isUser && <Iris size={28} think={false} />}
+          >
+            {!isUser && <Iris size={28} think={false} />}
 
-                  <div
-                    className={`
+            <div
+              className={`
                         max-w-[85%]
                         whitespace-pre-wrap
                         break-words
@@ -115,14 +116,14 @@ function Messages({chat, setShowConfirmation}) {  //messages component is respon
                             `
                         }
                       `}
-                  >
-                    {message.content}
-                  </div>
-                </div>
-              );
-            })}
+            >
+              {message.content}
+            </div>
+          </div>
+        );
+      })}
     </>
-  )
+  );
 }
 
-export default Messages
+export default Messages;
