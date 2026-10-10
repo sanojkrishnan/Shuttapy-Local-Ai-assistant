@@ -1,10 +1,11 @@
-import { Dot, Plus, ShieldAlert, Trash2 } from "lucide-react";
+import { Dot, Plus, Trash2 } from "lucide-react";
 import { HEAD, LINE, MUTE, PANEL, PAPER } from "../../Utils/UIElements";
 import { MODES } from "../../Utils/Modes";
 import { focus } from "../../TailwindElements/tailwindClass";
 import { Button } from "./Button";
 import ShuttapyMascot from "./ShuttapyMascot";
 import BellButton from "./BellButton";
+import { useShuttapyState } from "../../Hooks/useShuttapyState";
 
 function LeftSideBar({
   chats,
@@ -16,6 +17,8 @@ function LeftSideBar({
   setShowConfirmation,
   showConfirmation,
 }) {
+  const { state } = useShuttapyState({ enable: ["error", "sleep", "success"] });
+
   return (
     <>
       {/* LEFT SIDEBAR */}
@@ -35,7 +38,7 @@ function LeftSideBar({
             ${HEAD}
           `}
         >
-          <ShuttapyMascot size={80} />
+          <ShuttapyMascot state={state} size={80} />
           <span className="pr-6"> Shuttapy </span>
         </div>
         {/* VISUAL CONFIRMATION BUTTON */}
@@ -58,7 +61,7 @@ function LeftSideBar({
               className={`
                 flex items-center gap-2.5
                 rounded-xl px-2.5 py-2
-                text-left text-[14.5px]
+                text-left text-[14.5px] cursor-pointer
                 ${focus}
                 ${
                   key === mode
@@ -76,19 +79,14 @@ function LeftSideBar({
 
         {/* NEW CHAT */}
 
-        <button
+        <Button
           onClick={createNewChat}
-          className={`
-            flex items-center justify-center gap-2
-            rounded-full border px-3.5 py-2
-            text-sm
-            ${LINE}
-            ${focus}
+          className={`flex items-center justify-center
           `}
         >
           <Plus size={16} />
           New chat
-        </button>
+        </Button>
 
         {/* CHAT LIST */}
         <div>

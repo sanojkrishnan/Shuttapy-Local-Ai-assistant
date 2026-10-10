@@ -1,100 +1,242 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Button } from "./Button";
-import { BellIcon, ShieldAlert } from "lucide-react";
-import { LINE, MUTE, PANEL } from "../../Utils/UIElements";
+import { BellIcon, Bug, MonitorX, ShieldAlert, X } from "lucide-react";
+import { MUTE } from "../../Utils/UIElements";
+import { useSelector } from "react-redux";
+
+const AUTO_CLOSE_MS = 5000;
+
+const STYLES = {
+  amber: { border: "border-[#FFD43B]", icon: "text-amber-500" },
+  red: { border: "border-red-500", icon: "text-red-500" },
+};
 
 function BellButton({ setShowConfirmation, showConfirmation }) {
-  const [showNotification, setShowNotification] = useState(false);
-  const [notificationDot, setNotificationDot] = useState(true);
+  const [open, setOpen] = useState(false);
+  const [unread, setUnread] = useState(false);
   const [ringKey, setRingKey] = useState(0);
   const [panelLeft, setPanelLeft] = useState(0);
+  const [dismissedError, setDismissedError] = useState(null);
+  const [popToken, setPopToken] = useState(0);
+
   const divRef = useRef(null);
   const panelRef = useRef(null);
+  const closeTimerRef = useRef(null);
+  const seenKeysRef = useRef(new Set()); // keys we've already announced
+  const osNotificationsRef = useRef(new Map()); // key -> Windows notification
 
+  const { startingError } = useSelector((state) => state.shuttapy);
+
+  // All active notifications (anything not closed with X stays here)
+  const notifications = [];
+  if (showConfirmation) {
+    notifications.push({
+      key: "permission",
+      icon: ShieldAlert,
+      color: "amber",
+      title: "Agent permission required",
+      message: "The agent wants to perform an action on your computer.",
+      needsAction: true,
+    });
+  }
+  if (startingError && startingError !== dismissedError) {
+    notifications.push({
+      key: "error",
+      icon: MonitorX,
+      color: "red",
+      title: "Something went wrong",
+      message: String(startingError),
+    });
+  }
+
+  // panel starts exactly where the sidebar ends
+  const updatePanelPosition = useCallback(() => {
+    const aside = divRef.current?.closest("aside");
+    setPanelLeft(aside ? aside.getBoundingClientRect().right : 0);
+  }, []);
+
+  const clearCloseTimer = useCallback(() => {
+    clearTimeout(closeTimerRef.current);
+    closeTimerRef.current = null;
+  }, []);
+
+  // opens by itself, then closes after 5 seconds
+  const popUp = useCallback(() => {
+    updatePanelPosition();
+    setOpen(true);
+    setUnread(true);
+    setRingKey((k) => k + 1);
+    setPopToken((t) => t + 1); // (re)starts the 5 second countdown
+  }, [updatePanelPosition]);
+
+  function askOsPermission() {
+    if (
+      typeof Notification !== "undefined" &&
+      Notification.permission === "default"
+    ) {
+      Notification.requestPermission();
+    }
+  }
+
+  useEffect(askOsPermission, []);
+  useEffect(() => clearCloseTimer, [clearCloseTimer]); // cleanup on unmount
+
+  // auto-close 5 seconds after an automatic pop-up
   useEffect(() => {
-    function handleClickOutside(event) {
-      const inButton = divRef.current?.contains(event.target);
-      const inPanel = panelRef.current?.contains(event.target);
-      if (!inButton && !inPanel) setShowNotification(false);
+    if (!popToken) return;
+    const id = setTimeout(() => setOpen(false), AUTO_CLOSE_MS);
+    return () => clearTimeout(id); // React cancels it on re-run/unmount
+  }, [popToken]);
+
+  // close on outside click
+  useEffect(() => {
+    function handleClickOutside(e) {
+      const inButton = divRef.current?.contains(e.target);
+      const inPanel = panelRef.current?.contains(e.target);
+      if (!inButton && !inPanel) {
+        setPopToken(0); // cancels the countdown
+        setOpen(false);
+      }
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // react to notifications appearing/disappearing
+  const keys = notifications.map((n) => n.key).join("|");
+  useEffect(() => {
+    const current = new Set(notifications.map((n) => n.key));
+
+    // removed notifications: also remove them from the Windows notification panel
+    for (const key of [...seenKeysRef.current]) {
+      if (!current.has(key)) {
+        seenKeysRef.current.delete(key);
+        osNotificationsRef.current.get(key)?.close();
+        osNotificationsRef.current.delete(key);
+      }
+    }
+
+    // new notifications: pop up + Windows notification
+    const fresh = notifications.filter((n) => !seenKeysRef.current.has(n.key));
+    if (fresh.length) {
+      popUp();
+      fresh.forEach((n) => {
+        seenKeysRef.current.add(n.key);
+        if (
+          typeof Notification !== "undefined" &&
+          Notification.permission === "granted"
+        ) {
+          const os = new Notification(n.title, { body: n.message, tag: n.key });
+          os.onclick = () => {
+            window.focus();
+            popUp();
+            os.close();
+          };
+          osNotificationsRef.current.set(n.key, os);
+        }
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [keys, popUp]);
+
+  // X button: removes the notification completely
+  function dismiss(n) {
+    if (n.key === "permission") setShowConfirmation(false);
+    else setDismissedError(startingError);
+    // the effect above closes the matching Windows notification
+  }
+
   function handleToggle(e) {
     e.stopPropagation();
-    // the panel starts exactly where the sidebar ends
-    const aside = divRef.current?.closest("aside");
-    setPanelLeft(aside ? aside.getBoundingClientRect().right : 0);
-
-    setShowConfirmation((prev) => !prev);
-    setShowNotification((prev) => !prev);
-    setNotificationDot(false);
-    setRingKey((prev) => prev + 1);
+    clearCloseTimer(); // opened by hand = stays open
+    updatePanelPosition();
+    setOpen((prev) => !prev);
+    setUnread(false);
+    setRingKey((k) => k + 1);
+    askOsPermission();
   }
 
   return (
     <div className="relative" ref={divRef}>
-      <Button className="" onMouseDown={handleToggle}>
+      <Button onMouseDown={handleToggle}>
         <div
           key={ringKey}
           className="relative flex items-center justify-center gap-2"
         >
           <BellIcon
-            className={`${notificationDot ? "fill-red-500 text-red-500" : ""} size-4 bellRing`}
+            className={`${unread && notifications.length ? "fill-red-500 text-red-500" : ""} size-4 bellRing`}
           />{" "}
           Notifications
         </div>
       </Button>
 
-      {/* notification panel: rendered outside the sidebar */}
       {createPortal(
         <div
           ref={panelRef}
           style={{ left: panelLeft }}
           className={`
-            fixed ml-4 top-20 z-10 w-80 p-3
-            rounded-2xl border border-l-0 shadow-lg
+            fixed ml-4 top-20 z-10 w-80 p-3 flex flex-col gap-3
+            rounded-2xl
             transition-all duration-300 ease-in-out
-            ${PANEL} ${LINE}
             ${
-              showNotification
+              open
                 ? "translate-x-0 opacity-100"
                 : "-translate-x-full opacity-0 pointer-events-none"
             }
           `}
         >
-          {showConfirmation ? (
-            <div
-              className={`rounded-2xl border-2 border-[#FFD43B] p-3 ${PANEL}`}
-            >
-              <div className="flex items-center text-white gap-2 text-[13px] font-medium">
-                <ShieldAlert size={16} className="text-amber-500" />
-                Agent permission required
-              </div>
-
-              <p className={`mt-2 text-[12px] leading-relaxed ${MUTE}`}>
-                The agent wants to perform an action on your computer.
-              </p>
-
-              <div className="mt-2 flex gap-2">
-                <Button
-                  className="px-3 py-1 text-xs"
-                  onClick={() => setShowConfirmation(false)}
-                >
-                  Allow
-                </Button>
-                <Button
-                  onClick={() => setShowConfirmation(false)}
-                  className={`px-3 py-1 text-xs`}
-                >
-                  Deny
-                </Button>
-              </div>
+          {notifications.length === 0 ? (
+            <div className="rounded-2xl backdrop-blur-sm p-3 shadow-lg ">
+              <p className={`text-[13px] ${MUTE}`}>No notifications</p>
             </div>
           ) : (
-            <p className={`text-[13px] ${MUTE} m-2`}>No notifications</p>
+            notifications.map((n) => {
+              const Icon = n.icon;
+              const style = STYLES[n.color];
+              return (
+                <div
+                  key={n.key}
+                  className={`rounded-2xl border-2 p-3 bg-white/10 shadow-lg backdrop-blur-sm ${style.border}`}
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-center text-white gap-2 text-[13px] font-medium">
+                      <Icon size={16} className={style.icon} />
+                      {n.title}
+                    </div>
+                    <button
+                      type="button"
+                      aria-label="Clear notification"
+                      onClick={() => dismiss(n)}
+                      className="text-white/60 hover:text-white cursor-pointer"
+                    >
+                      <X size={14} />
+                    </button>
+                  </div>
+
+                  <p className={`mt-2 text-[12px] leading-relaxed ${MUTE}`}>
+                    {n.message}
+                  </p>
+
+                  {n.needsAction && (
+                    <div className="mt-2 flex gap-2">
+                      <Button
+                        className="px-3 py-1 text-xs"
+                        onClick={() => setShowConfirmation(false)}
+                      >
+                        Allow
+                      </Button>
+                      <Button
+                        className="px-3 py-1 text-xs"
+                        onClick={() => setShowConfirmation(false)}
+                      >
+                        Deny
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              );
+            })
           )}
         </div>,
         document.body,

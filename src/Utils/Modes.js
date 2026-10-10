@@ -14,7 +14,7 @@ export const MODES = {
   chat: {
     label: "Chat",
     icon: MessageSquare,
-    hint: "Talk, plan and remember things. Everything stays on this PC.",
+    hint: "Tell me Appu, What's in your mind",
     actions: ["Remember …", "Plan my week", "What do you remember about me?"],
   },
   files: {

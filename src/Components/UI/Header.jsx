@@ -1,13 +1,24 @@
-import { useState } from "react";
+import { useEffect } from "react";
 import { MODES } from "../../Utils/Modes";
 import { HEAD, LINE, MUTE, PANEL } from "../../Utils/UIElements";
 import { TriangleAlert } from "lucide-react";
 import { selectPermitted } from "../../redux/slice/gpuSlice";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { startShuttapy } from "../../redux/slice/shuttapySlice";
 
 function Header({ mode, setMode, DefaultMode }) {
   const permitted = useSelector(selectPermitted);
-  const [live] = useState(true); //live is a state that indicates if the local AI agent is running or not. It is set to true for the demo version of this app.
+
+  const dispatch = useDispatch();
+
+  const { started, starting, startingError } = useSelector(
+    (state) => state.shuttapy,
+  );
+
+  useEffect(() => {
+    dispatch(startShuttapy());
+  }, [dispatch]);
+
   return (
     <>
       <header
@@ -50,19 +61,23 @@ function Header({ mode, setMode, DefaultMode }) {
         <span
           className={`
               flex items-center gap-1.5
-              text-[12.5px] ${
-            permitted ? "ml-2.5" : ""
-          }
+              text-[12.5px] ${permitted ? "ml-2.5" : ""}
               ${MUTE}
             `}
         >
           <i
             className={`
                 h-2 w-2 rounded-full
-                ${live ? "bg-emerald-500" : "bg-[#9C98C4]"}
+                ${started ? "bg-emerald-500" : starting ? "bg-yellow-500 animate-pulse" : startingError ? "bg-[#ff811b] animate-pulse" : " bg-red-500 animate-pulse"}
               `}
           />
-          Local AI
+          {started
+            ? "Local AI"
+            : starting
+              ? "Connecting"
+              : startingError
+                ? "Error"
+                : "Global AI"}
         </span>
 
         <span

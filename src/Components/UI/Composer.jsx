@@ -65,7 +65,7 @@ function Composer({
               />
 
               <button
-                className={iconBtn}
+                className={`cursor-pointer ${iconBtn}`}
                 onClick={() => fileRef.current?.click()}
                 aria-label="Attach files"
               >
@@ -103,7 +103,7 @@ function Composer({
               {/* MICROPHONE */}
 
               <button
-                className={`
+                className={`cursor-pointer
                   ${iconBtn}
                   ${
                     listening ? "animate-pulse bg-[#FFD43B] text-[#1D1A3B]" : ""
@@ -118,7 +118,7 @@ function Composer({
               {/* SPEAKER */}
 
               <button
-                className={`
+                className={`cursor-pointer
                   ${iconBtn}
                   ${speak ? "bg-[#ECEAF6] dark:bg-[#14122B]" : ""}
                 `}
@@ -136,7 +136,7 @@ function Composer({
                 onClick={handleSend}
                 disabled={!text.trim()}
                 aria-label="Send message"
-                className={`
+                className={`cursor-pointer
                   grid h-10.5 w-10.5
                   shrink-0 place-items-center
                   rounded-full

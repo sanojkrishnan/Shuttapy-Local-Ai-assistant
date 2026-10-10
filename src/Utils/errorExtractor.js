@@ -3,9 +3,9 @@ export const extractError = (err, fallback) => {
   // No response at all = request never reached the server
   if (!err.response) {
     if (err.code === "ECONNABORTED") {
-      return "Request timed out. Please try again.";
+      return "Request timed out.";
     }
-    return "Unable to connect to the server. Please check your connection and try again.";
+    return "Unable to connect to the server.";
   }
 
   return (

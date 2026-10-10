@@ -1,8 +1,16 @@
+import { useShuttapyState } from "../../Hooks/useShuttapyState";
 import { HEAD, MUTE } from "../../Utils/UIElements";
 import ShuttapyMascot from "./ShuttapyMascot";
+//     import { setShuttapyGreeting } from "./hooks/useShuttapyState";
 
 function NewChat({ chat, DefaultMode, mode }) {
-  console.log("CHAT FROM THE NEWCHAT ,", chat);
+  // Example: everything except the success hop
+  const { state, greetText, replay } = useShuttapyState({
+    enable: ["greet", "error", "wake"],
+    //  useEffect(() => { replay(); }, [chatId, replay]);  //if new chat is added use this
+
+    // setShuttapyGreeting(aiGreeting)
+  });
   return (
     <div className="flex flex-col items-center justify-center">
       {chat.messages.length === 0 && (
@@ -22,7 +30,6 @@ function NewChat({ chat, DefaultMode, mode }) {
           >
             {mode === "chat" ? "Hi, I'm Shuttapy." : DefaultMode.label}
           </h1>
-
           <p
             className={`
                     m-0 max-w-[42ch]
@@ -32,7 +39,7 @@ function NewChat({ chat, DefaultMode, mode }) {
           >
             {DefaultMode.hint}
           </p>
-          <ShuttapyMascot />
+          <ShuttapyMascot state={state} greetText={greetText} />
         </div>
       )}
     </div>

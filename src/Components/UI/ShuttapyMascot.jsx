@@ -1,50 +1,31 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-
-/* ---------- state hook ---------- */
-export function useShuttapyState(initial = "wake") {
-  const [base, setBase] = useState(initial);
-  const [flash, setFlash] = useState(null);
-  const timer = useRef();
-
-  // wake -> idle automatically (but never clobber a newer state)
-  useEffect(() => {
-    if (initial !== "wake") return;
-    const t = setTimeout(
-      () => setBase((s) => (s === "wake" ? "idle" : s)),
-      1200,
-    );
-    return () => clearTimeout(t);
-  }, [initial]);
-
-  useEffect(() => () => clearTimeout(timer.current), []);
-
-  const play = useCallback((s, ms) => {
-    clearTimeout(timer.current);
-    setFlash(s);
-    timer.current = setTimeout(() => setFlash(null), ms);
-  }, []);
-
-  const success = useCallback(() => play("success", 800), [play]);
-  const error = useCallback(() => play("error", 1000), [play]);
-
-  return { state: flash ?? base, set: setBase, success, error };
-}
+import { useEffect, useRef, useState } from "react";
 
 /* ---------- mascot ---------- */
-const NO_BLINK = new Set(["wake", "error"]);
+const NO_BLINK = new Set(["wake", "error", "sleep", "success", "greet"]);
 
 function ShuttapyMascot({
   state = "idle",
   size = 320,
   followCursor = true,
+  greetText = "Hi, I'm Shuttapy!",
   onPoke,
 }) {
   const rootRef = useRef(null);
   const pokeTimer = useRef();
   const [blink, setBlink] = useState(false);
   const [poked, setPoked] = useState(false);
+  const pointer = useRef(null); // last known cursor position
+  const lastMove = useRef(0);
+  const look = useRef({ x: 0, y: 0 }); // current eye offset (survives re-renders)
+  const kick = useRef(null);
+  const [bubbleVisible, setBubbleVisible] = useState(state === "greet");
+  const [bubbleLeaving, setBubbleLeaving] = useState(false);
 
-  /* Blinking (leak-free, occasional double blink) */
+  // follow only when nothing else is animating
+  const canFollow = followCursor && state === "idle" && !poked;
+  const allowRef = useRef(canFollow);
+  allowRef.current = canFollow;
+
   useEffect(() => {
     if (NO_BLINK.has(state)) {
       setBlink(false);
@@ -75,44 +56,6 @@ function ShuttapyMascot({
     };
   }, [state]);
 
-  /* Eyes follow the cursor (CSS vars, no re-renders) */
-  useEffect(() => {
-    const el = rootRef.current;
-    if (!el || !followCursor) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-
-    const MAX = 10;
-    let raf = 0;
-    let idleTimer;
-
-    const setLook = (x, y) => {
-      el.style.setProperty("--look-x", x.toFixed(2));
-      el.style.setProperty("--look-y", y.toFixed(2));
-    };
-
-    const onMove = (e) => {
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(() => {
-        const r = el.getBoundingClientRect();
-        const dx = e.clientX - (r.left + r.width / 2);
-        const dy = e.clientY - (r.top + r.height / 2);
-        const dist = Math.hypot(dx, dy) || 1;
-        const k = Math.min(dist / 250, 1);
-        setLook((dx / dist) * MAX * k, (dy / dist) * MAX * k * 0.7);
-      });
-      clearTimeout(idleTimer);
-      idleTimer = setTimeout(() => setLook(0, 0), 4000); // look back to center
-    };
-
-    window.addEventListener("pointermove", onMove, { passive: true });
-    return () => {
-      window.removeEventListener("pointermove", onMove);
-      cancelAnimationFrame(raf);
-      clearTimeout(idleTimer);
-      setLook(0, 0);
-    };
-  }, [followCursor]);
-
   useEffect(() => () => clearTimeout(pokeTimer.current), []);
 
   const handlePoke = () => {
@@ -122,6 +65,88 @@ function ShuttapyMascot({
     pokeTimer.current = setTimeout(() => setPoked(false), 500);
   };
 
+  /* Always remember where the cursor is (cheap, no re-renders) */
+  useEffect(() => {
+    if (!followCursor) return;
+    const onMove = (e) => {
+      pointer.current = { x: e.clientX, y: e.clientY };
+      lastMove.current = performance.now();
+      kick.current?.(); // wake the loop if it was resting
+    };
+    window.addEventListener("pointermove", onMove, { passive: true });
+    return () => window.removeEventListener("pointermove", onMove);
+  }, [followCursor]);
+
+  /* Eased cursor following: target is the cursor when allowed, center otherwise */
+  useEffect(() => {
+    const el = rootRef.current;
+    if (!el || !followCursor) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    const MAX = 10;
+    let raf = 0;
+
+    const tick = () => {
+      raf = 0;
+      const p = pointer.current;
+      const active =
+        allowRef.current && p && performance.now() - lastMove.current < 4000;
+      let tx = 0;
+      let ty = 0;
+
+      if (active) {
+        const r = el.getBoundingClientRect();
+        const dx = p.x - (r.left + r.width / 2);
+        const dy = p.y - (r.top + r.height / 2);
+        const dist = Math.hypot(dx, dy) || 1;
+        const k = Math.min(dist / 250, 1);
+        tx = (dx / dist) * MAX * k;
+        ty = (dy / dist) * MAX * k * 0.7;
+      }
+
+      const L = look.current;
+      L.x += (tx - L.x) * 0.18;
+      L.y += (ty - L.y) * 0.18;
+      el.style.setProperty("--look-x", L.x.toFixed(2));
+      el.style.setProperty("--look-y", L.y.toFixed(2));
+
+      if (active || Math.abs(L.x) > 0.02 || Math.abs(L.y) > 0.02) {
+        raf = requestAnimationFrame(tick);
+      }
+    };
+
+    const start = () => {
+      if (!raf) raf = requestAnimationFrame(tick);
+    };
+    kick.current = start;
+
+    return () => {
+      cancelAnimationFrame(raf);
+      kick.current = null;
+    };
+  }, [followCursor]);
+
+  /* wake the loop whenever the mascot enters or leaves a followable state */
+  useEffect(() => {
+    kick.current?.();
+  }, [canFollow]);
+
+  /* Speech bubble: fades out smoothly when the greeting ends */
+  useEffect(() => {
+    if (state === "greet") {
+      setBubbleVisible(true);
+      setBubbleLeaving(false);
+      return;
+    }
+    if (!bubbleVisible) return;
+    setBubbleLeaving(true);
+    const t = setTimeout(() => {
+      setBubbleVisible(false);
+      setBubbleLeaving(false);
+    }, 400);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state]);
   return (
     <div
       ref={rootRef}
@@ -131,6 +156,15 @@ function ShuttapyMascot({
         poked ? "is-poked" : ""
       }`}
     >
+      {bubbleVisible && (
+        <div
+          key={greetText}
+          className={`shuttapy-bubble ${bubbleLeaving ? "is-leaving" : ""}`}
+          aria-live="polite"
+        >
+          {greetText}
+        </div>
+      )}
       <svg
         width="688"
         height="595"
