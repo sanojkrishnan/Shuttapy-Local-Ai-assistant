@@ -1,54 +1,68 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Button } from "./Button";
-import { BellIcon, Bug, MonitorX, ShieldAlert, X } from "lucide-react";
+import { BellIcon, MonitorX, ShieldAlert, X } from "lucide-react";
 import { MUTE } from "../../Utils/UIElements";
 import { useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
+import { removeNotification } from "../../redux/slice/notificationSlice";
+import { runNotificationCallback } from "../../Utils/notificationCallback";
 
 const AUTO_CLOSE_MS = 5000;
 
 const STYLES = {
-  amber: { border: "border-[#FFD43B]", icon: "text-amber-500" },
-  red: { border: "border-red-500", icon: "text-red-500" },
+  amber: {
+    border: "border-[#FFD43B]",
+    icon: "text-amber-500",
+  },
+  red: {
+    border: "border-red-500",
+    icon: "text-red-500",
+  },
+  emerald: {
+    border: "border-emerald-500",
+    icon: "text-emerald-500",
+  },
+  sky: {
+    border: "border-sky-500",
+    icon: "text-sky-500",
+  },
 };
 
-function BellButton({ setShowConfirmation, showConfirmation }) {
+function BellButton() {
   const [open, setOpen] = useState(false);
   const [unread, setUnread] = useState(false);
   const [ringKey, setRingKey] = useState(0);
   const [panelLeft, setPanelLeft] = useState(0);
-  const [dismissedError, setDismissedError] = useState(null);
   const [popToken, setPopToken] = useState(0);
 
   const divRef = useRef(null);
   const panelRef = useRef(null);
   const closeTimerRef = useRef(null);
-  const seenKeysRef = useRef(new Set()); // keys we've already announced
-  const osNotificationsRef = useRef(new Map()); // key -> Windows notification
+  const seenKeysRef = useRef(new Set());
+  const osNotificationsRef = useRef(new Map());
 
-  const { startingError } = useSelector((state) => state.shuttapy);
+  const dispatch = useDispatch();
+  const globalNotifications = useSelector((state) => state.notifications.items);
 
-  // All active notifications (anything not closed with X stays here)
-  const notifications = [];
-  if (showConfirmation) {
-    notifications.push({
-      key: "permission",
-      icon: ShieldAlert,
-      color: "amber",
-      title: "Agent permission required",
-      message: "The agent wants to perform an action on your computer.",
-      needsAction: true,
-    });
-  }
-  if (startingError && startingError !== dismissedError) {
-    notifications.push({
-      key: "error",
-      icon: MonitorX,
-      color: "red",
-      title: "Something went wrong",
-      message: String(startingError),
-    });
-  }
+  // Convert global Redux notifications into display notifications.
+  const notifications = globalNotifications.map((n) => {
+    const appearance = {
+      success: { icon: BellIcon, color: "emerald" },
+      error: { icon: MonitorX, color: "red" },
+      warning: { icon: ShieldAlert, color: "amber" },
+      info: { icon: BellIcon, color: "sky" },
+    };
+
+    const style = appearance[n.type] ?? appearance.info;
+
+    return {
+      ...n,
+      key: n.id,
+      icon: style.icon,
+      color: style.color,
+    };
+  });
 
   // panel starts exactly where the sidebar ends
   const updatePanelPosition = useCallback(() => {
@@ -140,11 +154,10 @@ function BellButton({ setShowConfirmation, showConfirmation }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [keys, popUp]);
 
-  // X button: removes the notification completely
   function dismiss(n) {
-    if (n.key === "permission") setShowConfirmation(false);
-    else setDismissedError(startingError);
-    // the effect above closes the matching Windows notification
+    if (!n.id) return;
+
+    dispatch(removeNotification(n.id));
   }
 
   function handleToggle(e) {
@@ -178,7 +191,7 @@ function BellButton({ setShowConfirmation, showConfirmation }) {
           className={`
             fixed ml-4 top-20 z-10 w-80 p-3 flex flex-col gap-3
             rounded-2xl
-            transition-all duration-300 ease-in-out
+            transition-all duration-300 ease-in-out overflow-y-auto custom-scrollbar
             ${
               open
                 ? "translate-x-0 opacity-100"
@@ -222,13 +235,24 @@ function BellButton({ setShowConfirmation, showConfirmation }) {
                     <div className="mt-2 flex gap-2">
                       <Button
                         className="px-3 py-1 text-xs"
-                        onClick={() => setShowConfirmation(false)}
+                        onClick={() => {
+                          if (!n.id) return;
+
+                          runNotificationCallback(n.id, true);
+                          dispatch(removeNotification(n.id));
+                        }}
                       >
                         Allow
                       </Button>
+
                       <Button
                         className="px-3 py-1 text-xs"
-                        onClick={() => setShowConfirmation(false)}
+                        onClick={() => {
+                          if (!n.id) return;
+
+                          runNotificationCallback(n.id, false);
+                          dispatch(removeNotification(n.id));
+                        }}
                       >
                         Deny
                       </Button>

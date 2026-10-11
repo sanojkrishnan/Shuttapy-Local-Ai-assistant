@@ -20,6 +20,10 @@ export const startShuttapy = createAsyncThunk(
       );
     }
   },
+  {
+    // skip if a check is already running
+    condition: (_, { getState }) => !getState().shuttapy.starting,
+  },
 );
 
 const shuttapySlice = createSlice({
@@ -41,12 +45,13 @@ const shuttapySlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(startShuttapy.pending, (state) => {
-        state.starting = true;
-        state.startingError = null;
+        state.starting = !state.started; // only the first connect shows "starting"
+        state.startingError = null ;
       })
       .addCase(startShuttapy.fulfilled, (state) => {
         state.starting = false;
         state.started = true;
+        state.startingError = null; // clears only once it actually works
       })
       .addCase(startShuttapy.rejected, (state, action) => {
         state.starting = false;

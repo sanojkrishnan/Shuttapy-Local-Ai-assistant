@@ -1,12 +1,25 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
-  Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Line, LineChart,
-  PolarAngleAxis, RadialBar, RadialBarChart, ResponsiveContainer, Tooltip,
-  XAxis, YAxis,
+  Area,
+  AreaChart,
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  Line,
+  LineChart,
+  PolarAngleAxis,
+  RadialBar,
+  RadialBarChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
 } from "recharts";
 import { Activity, ArrowDown, ArrowUp, Cpu, MemoryStick } from "lucide-react";
 import { LINE, PANEL } from "../../Utils/UIElements";
-import useMockStats from "../../Hooks/useMockStats";
+import useSystemStats from "../../Hooks/useSystemStats";
+import useNotifications from "../../Hooks/useNotifications";
 
 const C = {
   violet: "#8b5cf6",
@@ -26,7 +39,10 @@ function Tip({ active, payload, unit = "%" }) {
     <div className="rounded-lg border border-black/10 bg-white px-2.5 py-1.5 text-[11px] shadow-md dark:border-white/10 dark:bg-[#14122B]">
       {payload.map((p) => (
         <div key={p.dataKey} className="flex items-center gap-1.5 tabular-nums">
-          <span className="h-2 w-2 rounded-full" style={{ background: p.color }} />
+          <span
+            className="h-2 w-2 rounded-full"
+            style={{ background: p.color }}
+          />
           <span className="uppercase opacity-70">{p.dataKey}</span>
           <span className="font-medium">
             {Number(p.value).toFixed(unit === "%" ? 0 : 1)}
@@ -105,7 +121,10 @@ function History({ data }) {
               visible[s.key] ? "opacity-100" : "opacity-40"
             }`}
           >
-            <span className="h-2 w-2 rounded-full" style={{ background: s.color }} />
+            <span
+              className="h-2 w-2 rounded-full"
+              style={{ background: s.color }}
+            />
             {s.label}
           </button>
         ))}
@@ -113,16 +132,30 @@ function History({ data }) {
 
       <div className="h-32 w-full text-current">
         <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={data} margin={{ top: 4, right: 4, left: -22, bottom: 0 }}>
+          <AreaChart
+            data={data}
+            margin={{ top: 4, right: 4, left: -22, bottom: 0 }}
+          >
             <defs>
               {SERIES.map((s) => (
-                <linearGradient key={s.key} id={`fill-${s.key}`} x1="0" y1="0" x2="0" y2="1">
+                <linearGradient
+                  key={s.key}
+                  id={`fill-${s.key}`}
+                  x1="0"
+                  y1="0"
+                  x2="0"
+                  y2="1"
+                >
                   <stop offset="0%" stopColor={s.color} stopOpacity={0.35} />
                   <stop offset="100%" stopColor={s.color} stopOpacity={0} />
                 </linearGradient>
               ))}
             </defs>
-            <CartesianGrid vertical={false} stroke="currentColor" strokeOpacity={0.1} />
+            <CartesianGrid
+              vertical={false}
+              stroke="currentColor"
+              strokeOpacity={0.1}
+            />
             <XAxis dataKey="t" hide />
             <YAxis
               domain={[0, 100]}
@@ -131,7 +164,10 @@ function History({ data }) {
               tickLine={false}
               axisLine={false}
             />
-            <Tooltip content={<Tip />} cursor={{ stroke: "currentColor", strokeOpacity: 0.2 }} />
+            <Tooltip
+              content={<Tip />}
+              cursor={{ stroke: "currentColor", strokeOpacity: 0.2 }}
+            />
             {SERIES.filter((s) => visible[s.key]).map((s) => (
               <Area
                 key={s.key}
@@ -156,10 +192,24 @@ function BarTick({ x, y, payload, rows }) {
   const row = rows.find((r) => r.name === payload.value);
   return (
     <g transform={`translate(${x},${y})`}>
-      <text x={-6} y={-2} textAnchor="end" fontSize={11} fontWeight={500} fill="currentColor">
+      <text
+        x={-6}
+        y={-2}
+        textAnchor="end"
+        fontSize={11}
+        fontWeight={500}
+        fill="currentColor"
+      >
         {payload.value}
       </text>
-      <text x={-6} y={11} textAnchor="end" fontSize={10} fill="currentColor" opacity={0.55}>
+      <text
+        x={-6}
+        y={11}
+        textAnchor="end"
+        fontSize={10}
+        fill="currentColor"
+        opacity={0.55}
+      >
         {row?.detail}
       </text>
     </g>
@@ -207,7 +257,11 @@ function Network({ data, down, up }) {
     <div>
       <div className="mb-1 flex justify-between text-xs tabular-nums">
         <span className="flex items-center gap-1">
-          <ArrowDown size={13} style={{ color: C.emerald }} aria-hidden="true" />
+          <ArrowDown
+            size={13}
+            style={{ color: C.emerald }}
+            aria-hidden="true"
+          />
           {down.toFixed(1)} MB/s
         </span>
         <span className="flex items-center gap-1">
@@ -217,12 +271,29 @@ function Network({ data, down, up }) {
       </div>
       <div className="h-12 w-full">
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={data} margin={{ top: 4, right: 2, left: 2, bottom: 0 }}>
+          <LineChart
+            data={data}
+            margin={{ top: 4, right: 2, left: 2, bottom: 0 }}
+          >
             <XAxis dataKey="t" hide />
             <YAxis hide domain={[0, "dataMax + 1"]} />
             <Tooltip content={<Tip unit="MB/s" />} />
-            <Line type="monotone" dataKey="down" stroke={C.emerald} strokeWidth={1.6} dot={false} isAnimationActive={false} />
-            <Line type="monotone" dataKey="up" stroke={C.violet} strokeWidth={1.6} dot={false} isAnimationActive={false} />
+            <Line
+              type="monotone"
+              dataKey="down"
+              stroke={C.emerald}
+              strokeWidth={1.6}
+              dot={false}
+              isAnimationActive={false}
+            />
+            <Line
+              type="monotone"
+              dataKey="up"
+              stroke={C.violet}
+              strokeWidth={1.6}
+              dot={false}
+              isAnimationActive={false}
+            />
           </LineChart>
         </ResponsiveContainer>
       </div>
@@ -232,40 +303,88 @@ function Network({ data, down, up }) {
 
 /* ---------- panel ---------- */
 export default function SystemStats() {
-  const { stats: s, connected } = useMockStats();
+  const { stats: s, connected, error, ready } = useSystemStats();
+  // const { notify } = useNotifications();
+
+  // //notification
+  // useEffect(() => {
+  //   if (!error) return;
+
+  //   notify({
+  //     title: "Vitals are not reading",
+  //     message: error,
+  //     type: "error",
+  //   });
+  // }, [error, notify]);
+
+  const fmtTemp = (t) => (t == null ? "" : ` · ${Math.round(t)}°C`);
 
   const rows = [
-    { name: "GPU", value: Math.round(s.gpu), detail: `${Math.round(s.gpu)}% · ${Math.round(s.gpuTemp)}°C` },
-    { name: "VRAM", value: Math.round(s.vram), detail: `${((s.vram / 100) * 12).toFixed(1)} / 12 GB` },
-    { name: "Disk", value: Math.round(s.disk), detail: `${Math.round((s.disk / 100) * 512)} / 512 GB` },
+    ...(s.hasGpu
+      ? [
+          {
+            name: "GPU",
+            value: Math.round(s.gpu),
+            detail: `${Math.round(s.gpu)}%${fmtTemp(s.gpuTemp)}`,
+          },
+        ]
+      : []),
+    ...(s.hasVram
+      ? [
+          {
+            name: "VRAM",
+            value: Math.round(s.vram),
+            detail: `${s.vramUsedGb.toFixed(1)} / ${s.vramTotalGb.toFixed(1)} GB`,
+          },
+        ]
+      : []),
+    {
+      name: "Disk",
+      value: Math.round(s.disk),
+      detail: `${Math.round(s.diskUsedGb)} / ${Math.round(s.diskTotalGb)} GB`,
+    },
   ];
 
+  console.log("RAEDY FROM STATS", ready);
   return (
     <section
       aria-label="System resources"
       className={`rounded-2xl border p-4 ${PANEL} ${LINE}`}
     >
-      <div className="mb-4 flex items-center justify-between">
+      <div className="mb-4 flex flex-col">
         <h3 className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide opacity-70">
           <Activity size={14} aria-hidden="true" /> Local Resources
         </h3>
-        <span className="flex items-center gap-1.5 text-[11px] opacity-70">
+        <span className="flex self-end items-center gap-1.5 text-[11px] opacity-70">
           <span
             className={`h-1.5 w-1.5 rounded-full ${
-              connected ? "animate-pulse bg-emerald-500" : "bg-red-500"
+              connected
+                ? "animate-pulse bg-emerald-500"
+                : error
+                  ? "bg-red-500"
+                  : "animate-pulse bg-amber-400"
             }`}
           />
-          {connected ? "Live" : "Offline"}
+          {connected ? "Live" : error ? "Offline" : "Connecting..."}
         </span>
       </div>
 
       <div className="grid grid-cols-2 gap-2">
-        <Ring label="CPU" icon={Cpu} value={s.cpu} sub={`${Math.round(s.cpuTemp)}°C`} />
+        <Ring
+          label="CPU"
+          icon={Cpu}
+          value={s.cpu}
+          sub={
+            s.cpuTemp != null
+              ? `${Math.round(s.cpuTemp)}°C`
+              : `${s.cpuCores ?? "–"} cores`
+          }
+        />
         <Ring
           label="RAM"
           icon={MemoryStick}
           value={s.ram}
-          sub={`${((s.ram / 100) * 32).toFixed(1)} / 32 GB`}
+          sub={`${s.ramUsedGb.toFixed(1)} / ${s.ramTotalGb.toFixed(1)} GB`}
         />
       </div>
 

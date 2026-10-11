@@ -1,13 +1,5 @@
-import { useState } from "react";
-import {
-  DEFAULT_PERMS,
-  DOT,
-  HEAD,
-  LINE,
-  MUTE,
-  PANEL,
-  PERMS,
-} from "../../Utils/UIElements";
+import { useEffect, useState } from "react";
+import { DOT, HEAD, LINE, MUTE, PANEL, PERMS } from "../../Utils/UIElements";
 import {
   Activity,
   Brain,
@@ -19,16 +11,24 @@ import { DEMO_MEMORIES, DEMO_TRACE } from "../../Utils/Demo";
 import SystemStats from "./SystemStatus";
 import GlobalGpuPanel from "./GlobalGpuPanel";
 import Dropdown from "./DropDown";
+import { fetchSystemResources } from "../../redux/slice/systemResourceSlice";
+import { useDispatch } from "react-redux";
 
 function RightSideBar() {
-  const [perms, setPerms] = useState(DEFAULT_PERMS);
   const [permissionOpen, setPermissionOpen] = useState(false);
   const [activityOpen, setActivityOpen] = useState(false);
   const [memoryOpen, setMemoryOpen] = useState(false);
   const [trace] = useState(DEMO_TRACE);
   const [memories] = useState(DEMO_MEMORIES);
+  const dispatch = useDispatch();
 
   const [used] = useState("Local model");
+
+  useEffect(() => {
+    dispatch(fetchSystemResources());
+    const id = setInterval(() => dispatch(fetchSystemResources()), 2000);
+    return () => clearInterval(id);
+  }, [dispatch]);
   return (
     <>
       <aside

@@ -5,19 +5,28 @@ import { TriangleAlert } from "lucide-react";
 import { selectPermitted } from "../../redux/slice/gpuSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { startShuttapy } from "../../redux/slice/shuttapySlice";
+import useShuttapyConnection from "../../Hooks/useShuttapyConnection";
 
 function Header({ mode, setMode, DefaultMode }) {
   const permitted = useSelector(selectPermitted);
-
+  // const { notify } = useNotifications();
   const dispatch = useDispatch();
 
-  const { started, starting, startingError } = useSelector(
-    (state) => state.shuttapy,
-  );
-
+  const { started, starting, startingError } = useShuttapyConnection();
   useEffect(() => {
     dispatch(startShuttapy());
   }, [dispatch]);
+
+  // //notification
+  // useEffect(() => {
+  //   if (!startingError) return;
+
+  //   notify({
+  //     title: "Something Went Wrong...!",
+  //     message: startingError,
+  //     type: "error",
+  //   });
+  // }, [startingError, notify]);
 
   return (
     <>
@@ -72,12 +81,12 @@ function Header({ mode, setMode, DefaultMode }) {
               `}
           />
           {started
-            ? "Local AI"
+            ? "Local Model"
             : starting
               ? "Connecting"
               : startingError
                 ? "Error"
-                : "Global AI"}
+                : "Global Model"}
         </span>
 
         <span

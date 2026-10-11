@@ -13,9 +13,6 @@ function LeftSideBar({
   setActiveId,
   createNewChat,
   mode,
-  setMode,
-  setShowConfirmation,
-  showConfirmation,
 }) {
   const { state } = useShuttapyState({ enable: ["error", "sleep", "success"] });
 
@@ -44,10 +41,7 @@ function LeftSideBar({
         {/* VISUAL CONFIRMATION BUTTON */}
 
         <div className="m-1 flex justify-end">
-          <BellButton
-            showConfirmation={showConfirmation}
-            setShowConfirmation={setShowConfirmation}
-          />
+          <BellButton />
         </div>
 
         {/* MODES */}

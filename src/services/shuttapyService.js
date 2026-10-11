@@ -1,6 +1,5 @@
-
-import { api } from "../Utils/APIClient";
+import { requestSocket } from "../Utils/SocketClient";
 
 export const shuttapyService = {
-  checkBackend: () => api.get("/api/health"),
+  checkBackend: () => requestSocket("shuttapy:health"),
 };
