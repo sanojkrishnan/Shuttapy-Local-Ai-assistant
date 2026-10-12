@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   Area,
   AreaChart,
@@ -19,7 +19,7 @@ import {
 import { Activity, ArrowDown, ArrowUp, Cpu, MemoryStick } from "lucide-react";
 import { LINE, PANEL } from "../../Utils/UIElements";
 import useSystemStats from "../../Hooks/useSystemStats";
-import useNotifications from "../../Hooks/useNotifications";
+
 
 const C = {
   violet: "#8b5cf6",
@@ -253,6 +253,8 @@ function Bars({ rows }) {
 
 /* ---------- network (LineChart) ---------- */
 function Network({ data, down, up }) {
+  const fmtRate = (mb) =>
+    mb >= 1 ? `${mb.toFixed(1)} MB/s` : `${Math.round(mb * 1024)} KB/s`;
   return (
     <div>
       <div className="mb-1 flex justify-between text-xs tabular-nums">
@@ -262,11 +264,11 @@ function Network({ data, down, up }) {
             style={{ color: C.emerald }}
             aria-hidden="true"
           />
-          {down.toFixed(1)} MB/s
+          {fmtRate(down)}
         </span>
         <span className="flex items-center gap-1">
           <ArrowUp size={13} style={{ color: C.violet }} aria-hidden="true" />
-          {up.toFixed(1)} MB/s
+          {fmtRate(up)}
         </span>
       </div>
       <div className="h-12 w-full">

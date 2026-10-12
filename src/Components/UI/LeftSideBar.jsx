@@ -6,6 +6,7 @@ import { Button } from "./Button";
 import ShuttapyMascot from "./ShuttapyMascot";
 import BellButton from "./BellButton";
 import { useShuttapyState } from "../../Hooks/useShuttapyState";
+import ThemeToggle from "./ThemeToggle";
 
 function LeftSideBar({
   chats,
@@ -13,15 +14,18 @@ function LeftSideBar({
   setActiveId,
   createNewChat,
   mode,
+  setMode,
 }) {
-  const { state } = useShuttapyState({ enable: ["error", "sleep", "success"] });
+  const { state, talking } = useShuttapyState({
+    enable: ["error", "sleep", "success"],
+  });
 
   return (
     <>
       {/* LEFT SIDEBAR */}
       <aside
         className={`
-          relative z-20
+           z-20
     hidden flex-col gap-3 overflow-auto
     border-r p-2 md:flex custom-scrollbar
     ${PANEL}
@@ -35,12 +39,13 @@ function LeftSideBar({
             ${HEAD}
           `}
         >
-          <ShuttapyMascot state={state} size={80} />
+          <ShuttapyMascot state={state} talking={talking} size={80} />
           <span className="pr-6"> Shuttapy </span>
         </div>
         {/* VISUAL CONFIRMATION BUTTON */}
 
-        <div className="m-1 flex justify-end">
+        <div className="m-1 flex justify-between gap-3 items-center">
+          <ThemeToggle />
           <BellButton />
         </div>
 

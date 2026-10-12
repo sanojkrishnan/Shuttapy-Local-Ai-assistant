@@ -189,9 +189,9 @@ function BellButton() {
           ref={panelRef}
           style={{ left: panelLeft }}
           className={`
-            fixed ml-4 top-20 z-10 w-80 p-3 flex flex-col gap-3
+            fixed ml-4 top-20 z-10 w-80 h-screen p-3 flex flex-col gap-3
             rounded-2xl
-            transition-all duration-300 ease-in-out overflow-y-auto custom-scrollbar
+            transition-all duration-300 ease-in-out overflow-auto custom-scrollbar
             ${
               open
                 ? "translate-x-0 opacity-100"
@@ -210,10 +210,10 @@ function BellButton() {
               return (
                 <div
                   key={n.key}
-                  className={`rounded-2xl border-2 p-3 bg-white/10 shadow-lg backdrop-blur-sm ${style.border}`}
+                  className={`rounded-2xl border-2 p-3 dark:bg-white/10 shadow-lg backdrop-blur-sm bg-white/10  ${style.border}`}
                 >
                   <div className="flex items-start justify-between gap-2">
-                    <div className="flex items-center text-white gap-2 text-[13px] font-medium">
+                    <div className="flex items-center text-black gap-2 text-[13px] font-medium">
                       <Icon size={16} className={style.icon} />
                       {n.title}
                     </div>
@@ -221,7 +221,7 @@ function BellButton() {
                       type="button"
                       aria-label="Clear notification"
                       onClick={() => dismiss(n)}
-                      className="text-white/60 hover:text-white cursor-pointer"
+                      className="dark:text-white/60 text-black dark:hover:text-white hover:scale-120 cursor-pointer"
                     >
                       <X size={14} />
                     </button>

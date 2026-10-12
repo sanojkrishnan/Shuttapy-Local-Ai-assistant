@@ -1,16 +1,21 @@
-import { useShuttapyState } from "../../Hooks/useShuttapyState";
+import {
+  speak,
+  stopSpeaking,
+  useShuttapyState,
+} from "../../Hooks/useShuttapyState";
 import { HEAD, MUTE } from "../../Utils/UIElements";
 import ShuttapyMascot from "./ShuttapyMascot";
 //     import { setShuttapyGreeting } from "./hooks/useShuttapyState";
 
 function NewChat({ chat, DefaultMode, mode }) {
   // Example: everything except the success hop
-  const { state, greetText, replay } = useShuttapyState({
-    enable: ["greet", "error", "wake"],
-    //  useEffect(() => { replay(); }, [chatId, replay]);  //if new chat is added use this
-
-    // setShuttapyGreeting(aiGreeting)
+  const { state, greetText, talking } = useShuttapyState({
+    enable: ["error", "sleep", "success"],
+    talk: true,
   });
+  //  useEffect(() => { replay(); }, [chatId, replay]);  //if new chat is added use this
+
+  // setShuttapyGreeting(aiGreeting)
   return (
     <div className="flex flex-col items-center justify-center">
       {chat.messages.length === 0 && (
@@ -39,9 +44,18 @@ function NewChat({ chat, DefaultMode, mode }) {
           >
             {DefaultMode.hint}
           </p>
-          <ShuttapyMascot state={state} greetText={greetText} />
+          <ShuttapyMascot
+            state={state}
+            greetText={greetText}
+            talking={talking}
+          />
         </div>
       )}
+
+      {/* <Button onClick={() => speak("Hello Sanoj, I can talk now!")}>
+        Test talk
+      </Button>
+      <Button onClick={stopSpeaking}>Stop</Button> */}
     </div>
   );
 }

@@ -178,3 +178,24 @@
     transform: rotate(0deg);
   }
 }
+
+/* Theme Explode */
+
+@keyframes theme-explode {
+  0% {
+    clip-path: circle(0px at var(--x) var(--y));
+    opacity: 1;
+  }
+  70% {
+    clip-path: circle(150vmax at var(--x) var(--y));
+    opacity: 1;
+  }
+  100% {
+    clip-path: circle(150vmax at var(--x) var(--y));
+    opacity: 0;
+  }
+}
+
+.theme-explode {
+  animation: theme-explode 900ms ease-in-out forwards;
+}

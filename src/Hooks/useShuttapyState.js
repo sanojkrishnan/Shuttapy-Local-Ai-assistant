@@ -28,14 +28,61 @@ export function setShuttapyGreeting(text) {
   textListeners.forEach((l) => l());
 }
 
+/* ---------- shared talking flag ---------- */
+let talkingNow = false;
+let currentUtterance = null;
+const talkListeners = new Set();
+
+const subscribeTalk = (cb) => {
+  talkListeners.add(cb);
+  return () => talkListeners.delete(cb);
+};
+const getTalking = () => talkingNow;
+
+function setTalkingNow(v) {
+  if (v === talkingNow) return;
+  talkingNow = v;
+  talkListeners.forEach((l) => l());
+}
+
+export function speak(text) {
+  if (!text || !("speechSynthesis" in window)) return;
+
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  currentUtterance = u;
+
+  u.onstart = () => setTalkingNow(true);
+  const done = () => {
+    if (currentUtterance === u) setTalkingNow(false);
+  };
+  u.onend = done;
+  u.onerror = done;
+
+  speechSynthesis.speak(u);
+}
+
+export function stopSpeaking() {
+  currentUtterance = null;
+  speechSynthesis.cancel();
+  setTalkingNow(false);
+}
+
 /*
   useShuttapyState({ initial, enable })
   enable = which emotions THIS mascot may show:
   "greet" | "error" | "wake" | "sleep" | "success"
 */
-export function useShuttapyState({ initial = "idle", enable = ALL } = {}) {
+export function useShuttapyState({
+  initial = "idle",
+  enable = ALL,
+  talk = false,
+} = {}) {
   const [base, setBase] = useState(initial);
   const [flash, setFlash] = useState(null);
+  const talkingGlobal = useSyncExternalStore(subscribeTalk, getTalking);
+  const talking = talk && talkingGlobal;
+
   const timer = useRef();
   const wasStarted = useRef(false);
 
@@ -95,5 +142,13 @@ export function useShuttapyState({ initial = "idle", enable = ALL } = {}) {
   else if (on("sleep") && !started) state = "sleep";
   else state = base;
 
-  return { state, greetText: text, set: setBase, success, error, replay };
+ return {
+  state,
+  greetText: text,
+  talking,
+  set: setBase,
+  success,
+  error,
+  replay,
+};
 }

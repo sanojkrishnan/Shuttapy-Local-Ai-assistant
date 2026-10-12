@@ -7,7 +7,6 @@
 // toast keeps working even if that shape ever changes.
 export function getErrorMessage(err, fallback = "Something went wrong") {
   if (!err) return fallback;
-  console.log("ERROR FROM THE GETERRORMESSAGE:", err);
   // extractError returned a plain string — the most likely case.
   if (typeof err === "string") return err;
 

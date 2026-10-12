@@ -1,4 +1,3 @@
-
 import { useCallback } from "react";
 import { useDispatch } from "react-redux";
 
@@ -8,34 +7,27 @@ import {
   clearNotifications,
 } from "../redux/slice/notificationSlice";
 
-import {
-  registerNotificationCallback,
-} from "../Utils/notificationCallback";
+import { registerNotificationCallback } from "../Utils/notificationCallback";
 
 export default function useNotifications() {
   const dispatch = useDispatch();
 
   const notify = useCallback(
-    ({ title, message, type = "info" }) => {
+    ({ title, message, type = "info", needsAction= false }) => {
       dispatch(
         addNotification({
           title,
           message,
           type,
-          needsAction: false,
-        })
+          needsAction
+        }),
       );
     },
-    [dispatch]
+    [dispatch],
   );
 
   const confirm = useCallback(
-    ({
-      title,
-      message,
-      onAllow,
-      onDeny,
-    }) => {
+    ({ title, message, onAllow, onDeny }) => {
       const id = crypto.randomUUID();
 
       registerNotificationCallback(id, {
@@ -50,22 +42,22 @@ export default function useNotifications() {
           message,
           type: "warning",
           needsAction: true,
-        })
+        }),
       );
 
       return id;
     },
-    [dispatch]
+    [dispatch],
   );
 
   const dismiss = useCallback(
     (id) => dispatch(removeNotification(id)),
-    [dispatch]
+    [dispatch],
   );
 
   const clearAll = useCallback(
     () => dispatch(clearNotifications()),
-    [dispatch]
+    [dispatch],
   );
 
   return {

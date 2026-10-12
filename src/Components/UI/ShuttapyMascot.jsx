@@ -7,6 +7,7 @@ function ShuttapyMascot({
   state = "idle",
   size = 320,
   followCursor = true,
+  talking = false,
   greetText = "Hi, I'm Shuttapy!",
   onPoke,
 }) {
@@ -24,6 +25,41 @@ function ShuttapyMascot({
   // follow only when nothing else is animating
   const canFollow = followCursor && state === "idle" && !poked;
   const allowRef = useRef(canFollow);
+
+  // don't talk while asleep, erroring or waking up
+  const isTalking = talking && !["sleep", "error", "wake"].includes(state);
+
+  /* Talking: random "syllables" drive the --mouth-open CSS variable (0 to 1) */
+  useEffect(() => {
+    const el = rootRef.current;
+    if (!el) return;
+
+    if (!isTalking) {
+      el.style.setProperty("--mouth-open", "0");
+      return;
+    }
+
+    // reduced motion: hold the mouth half open instead of flapping
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      el.style.setProperty("--mouth-open", "0.4");
+      return () => el.style.setProperty("--mouth-open", "0");
+    }
+
+    let t;
+    const step = () => {
+      // ~15% of the time close fully (a pause between syllables)
+      const open = Math.random() < 0.15 ? 0 : 0.3 + Math.random() * 0.7;
+      el.style.setProperty("--mouth-open", open.toFixed(2));
+      t = setTimeout(step, 90 + Math.random() * 130);
+    };
+    step();
+
+    return () => {
+      clearTimeout(t);
+      el.style.setProperty("--mouth-open", "0");
+    };
+  }, [isTalking]);
+
   allowRef.current = canFollow;
 
   useEffect(() => {
@@ -154,7 +190,7 @@ function ShuttapyMascot({
       style={{ "--size": `${size}px` }}
       className={`shuttapy-mascot state-${state} ${blink ? "is-blinking" : ""} ${
         poked ? "is-poked" : ""
-      }`}
+      } ${isTalking ? "is-talking" : ""}`}
     >
       {bubbleVisible && (
         <div

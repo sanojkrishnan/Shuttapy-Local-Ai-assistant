@@ -1,24 +1,27 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { extractError } from "../../Utils/errorExtractor";
+import { messageAPI } from "../../services/messageServise";
+import { getErrorMessage } from "../../Utils/getErrorMessage";
 
 const initialState = {
   chatMessage: null,
+  permissionMessage: null,
   logMessage: null,
   errorMessage: null,
   isChatMessageLoading: false,
 };
 
 // Fetch the cart for a specific user from backend
-export const fetchCoupon = createAsyncThunk(
-//   "coupon/fetch",
-//   async ({ pagination }, { rejectWithValue }) => {
-//     try {
-//       const allCoupons = await messageAPI.fetchCoupons(pagination);
-//       return allCoupons;
-//     } catch (err) {
-//       return rejectWithValue(extractError(err, "Failed to fetch Coupon"));
-//     }
-//   },
+export const fetchResponse = createAsyncThunk(
+  "response/fetch",
+  async ({ message }, { rejectWithValue }) => {
+    try {
+      const response = await messageAPI.fetchResponse(message);
+      return response;
+    } catch (err) {
+      return rejectWithValue(extractError(err, "Connection lost"));
+    }
+  },
 );
 
 const messageSlice = createSlice({
@@ -32,22 +35,23 @@ const messageSlice = createSlice({
     clearState(state) {
       state.chatMessage = null;
       state.logMessage = null;
+      state.permissionMessage = null;
     },
   },
   extraReducers: (builder) => {
     builder
-      // fetch coupons
-      .addCase(fetchCoupon.pending, (state) => {
-        state.isCouponLoading = true;
-        state.couponError = null;
+      .addCase(fetchResponse.pending, (state) => {
+        state.isChatMessageLoading = true;
+        state.errorMessage = null;
       })
-      .addCase(fetchCoupon.fulfilled, (state, action) => {
-        state.isCouponLoading = false;
-        state.coupon = action.payload?.data?.coupons;
+      .addCase(fetchResponse.fulfilled, (state, action) => {
+        state.isChatMessageLoading = false;
+        state.chatMessage = action.payload?.reply ?? action.payload;
+        state.permissionMessage = action.payload?.reply ?? action.payload;
       })
-      .addCase(fetchCoupon.rejected, (state, action) => {
-        state.isCouponLoading = false;
-        state.couponError = action.payload;
+      .addCase(fetchResponse.rejected, (state, action) => {
+        state.isChatMessageLoading = false;
+        state.errorMessage = getErrorMessage(action.payload);
       });
   },
 });

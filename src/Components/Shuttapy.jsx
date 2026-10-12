@@ -5,6 +5,7 @@ import LeftSideBar from "./UI/LeftSideBar";
 import CenterMain from "./UI/CenterMain";
 import { PAPER } from "../Utils/UIElements";
 import RightSideBar from "./UI/RightSideBar";
+import WelcomeScreen from "./UI/WelcomeScreen";
 
 export default function Shuttapy() {
   //states
@@ -34,6 +35,9 @@ export default function Shuttapy() {
           );
         `}
       </style>
+      {/* Welecom Screen */}
+
+      <WelcomeScreen />
 
       {/* LEFT SIDEBAR */}
 
@@ -47,6 +51,7 @@ export default function Shuttapy() {
         showConfirmation={showConfirmation}
         setShowConfirmation={setShowConfirmation}
       />
+      
 
       {/* CENTER */}
       <CenterMain

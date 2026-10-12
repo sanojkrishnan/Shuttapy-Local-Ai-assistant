@@ -6,6 +6,7 @@ import { selectPermitted } from "../../redux/slice/gpuSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { startShuttapy } from "../../redux/slice/shuttapySlice";
 import useShuttapyConnection from "../../Hooks/useShuttapyConnection";
+// import useNotifications from "../../Hooks/useNotifications";
 
 function Header({ mode, setMode, DefaultMode }) {
   const permitted = useSelector(selectPermitted);
@@ -17,14 +18,15 @@ function Header({ mode, setMode, DefaultMode }) {
     dispatch(startShuttapy());
   }, [dispatch]);
 
-  // //notification
+  // notification
   // useEffect(() => {
   //   if (!startingError) return;
 
   //   notify({
   //     title: "Something Went Wrong...!",
   //     message: startingError,
-  //     type: "error",
+  //     type: "confirm",
+  //     needsAction : true
   //   });
   // }, [startingError, notify]);
 
@@ -90,13 +92,13 @@ function Header({ mode, setMode, DefaultMode }) {
         </span>
 
         <span
-          className={`flex rounded-xl border border-amber-100 p-1 px-2 items-center gap-1.5 text-[12px] font-semibold ${
-            permitted ? "animate-pulse bg-red-500" : "opacity-30"
+          className={`flex rounded-xl border-3 border-amber-100 p-1 px-2 items-center gap-1.5 text-[12px] font-semibold ${
+            permitted ? " bg-red-500 text-white" : "opacity-30"
           }`}
         >
           {permitted ? (
             <span className="flex gap-1.5">
-              <TriangleAlert size={16} />
+              <TriangleAlert className="animate-pulse text-white" size={18} />
               Global GPU on
             </span>
           ) : (

@@ -25,6 +25,16 @@
   overflow: visible;
 }
 
+.shuttapy-mascot.is-talking .shuttapy-mouth {
+  transform-box: fill-box;
+  transform-origin: center;
+  transform: scale(
+    calc(1 + var(--mouth-open, 0) * 0.2),
+    calc(1 + var(--mouth-open, 0) * 1.4)
+  );
+  transition: transform 90ms ease-out;
+}
+
 .shuttapy-head {
   fill: var(--head);
   transition: fill 0.4s ease;
@@ -99,7 +109,6 @@
 .shuttapy-bubble.is-leaving {
   animation: bubble-out 0.35s ease-in both;
 }
-
 
 .shuttapy-bubble::after {
   content: "";
@@ -179,10 +188,4 @@
 }
 .is-poked .shuttapy-character {
   animation: poke 0.5s ease-out;
-}
-
-/*bell ring*/
-.bellRing {
-  animation: bellRing 0.8s ease-in-out;
-  transform-origin: top center; /* swing from the top, like a real bell */
 }

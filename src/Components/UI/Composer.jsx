@@ -41,7 +41,7 @@ function Composer({
           <FilePreview files={files} removeFile={removeFile} />
 
           {/* INPUT ROW: pr-14 leaves room for the chevron */}
-          <div className="relative mb-5 flex w-full items-center pr-14">
+          <div className="relative flex w-full items-center pr-14">
             {/* input box */}
             <div
               className={`
@@ -172,6 +172,10 @@ function Composer({
               </Button>
             </div>
           </div>
+          {/* | Voxmint digital marketing solutions */}
+          <p className="text-xs text-gray-400 text-center mt-2">
+            2026 &copy; Sanoj Krishnan M{" "}
+          </p>
         </div>
       </div>
     </>

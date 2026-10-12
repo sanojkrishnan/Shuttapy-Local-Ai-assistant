@@ -1,85 +1,42 @@
-import { LINE, MUTE, PANEL } from "../../Utils/UIElements";
+import { LINE, PANEL } from "../../Utils/UIElements";
 import Iris from "./Iris";
-import { Button } from "./Button";
-import { ShieldAlert } from "lucide-react";
+import { useSelector } from "react-redux";
+import ChatLoading from "./ChatLoading";
+import useNotifications from "../../Hooks/useNotifications";
+import { useEffect } from "react";
 
-function Messages({ chat, setShowConfirmation }) {
-  //messages component is responsible for rendering the chat messages in the UI. It takes in the chat object and a function to set the showConfirmation state as props.
+function Messages({ chat }) {
+  const { permissionMessage, errorMessage, isChatMessageLoading } = useSelector(
+    (s) => s.messages,
+  );
+  const { notify } = useNotifications();
+
+  console.log("ERROR FROM THE MESSAGE:", errorMessage);
+
+  // notification
+  useEffect(() => {
+    if (!errorMessage && !permissionMessage) return;
+
+    if (errorMessage) {
+      notify({
+        title: "Something Went Wrong...!",
+        message: errorMessage,
+        type: "error",
+      });
+    }
+    if (permissionMessage) {
+      notify({
+        title: "Permission Required",
+        message: permissionMessage,
+        type: "confirm",
+        needsAction: true,
+      });
+    }
+  }, [errorMessage, permissionMessage, notify]);
+
   return (
     <>
       {chat.messages.map((message, index) => {
-        if (message.role === "confirm") {
-          return (
-            <div
-              key={index}
-              role="alertdialog"
-              aria-label="Confirm action"
-              className={`
-                        ml-9.5
-                        grid max-w-130
-                        gap-2 rounded-2xl
-                        border-2
-                        border-[#FFD43B]
-                        p-3.5
-                        ${PANEL}
-                      `}
-            >
-              <b
-                className="
-                          flex items-center
-                          gap-2 text-[15px]
-                        "
-              >
-                <ShieldAlert size={18} className="text-amber-500" />
-                Allow this action?
-              </b>
-
-              <code
-                className={`
-                          break-all
-                          text-[13px]
-                          ${MUTE}
-                        `}
-              >
-                The local AI agent is requesting permission to perform an
-                action.
-              </code>
-
-              <div
-                className="
-                          flex gap-2
-                        "
-              >
-                <Button
-                  onClick={() => setShowConfirmation(false)}
-                  className={`
-                            rounded-full
-                            bg-violet-600
-                            px-4 py-1.5
-                            text-white
-                            hover:bg-violet-700
-                            ${focus}
-                          `}
-                >
-                  Allow once
-                </Button>
-
-                <button
-                  onClick={() => setShowConfirmation(false)}
-                  className={`
-                            rounded-full
-                            border px-4 py-1.5
-                            ${LINE}
-                            ${focus}
-                          `}
-                >
-                  Don't do it
-                </button>
-              </div>
-            </div>
-          );
-        }
-
         const isUser = message.role === "user";
 
         return (
@@ -90,11 +47,10 @@ function Messages({ chat, setShowConfirmation }) {
                       ${isUser ? "justify-end" : ""}
                     `}
           >
-            {!isUser && <Iris size={28} think={false} />}
+            {!isUser && <Iris think={false} size={28} />}
 
             <div
               className={`
-                        max-w-[85%]
                         whitespace-pre-wrap
                         break-words
                         px-4 py-2.5
@@ -104,13 +60,14 @@ function Messages({ chat, setShowConfirmation }) {
                         ${
                           isUser
                             ? `
-                              rounded-[20px_20px_4px_20px]
+                              rounded-[20px_4px_20px_20px]
                               bg-[#FFD43B]
                               text-[#1D1A3B]
+                              max-w-[85%]
                             `
                             : `
-                              rounded-[20px_20px_20px_4px]
-                              border
+                              rounded-[4px_20px_20px_20px]
+                           max-w-[100%]
                               ${PANEL}
                               ${LINE}
                             `
@@ -122,6 +79,23 @@ function Messages({ chat, setShowConfirmation }) {
           </div>
         );
       })}
+
+      {/* Loading bubble: shows while the AI is replying */}
+      {isChatMessageLoading && (
+        <div className="flex items-start gap-2.5">
+          <Iris think={true} size={28} />
+          <div
+            className={`
+              rounded-[4px_20px_20px_20px]
+              px-4 py-2.5
+              ${PANEL}
+              ${LINE}
+            `}
+          >
+            <ChatLoading variant="skeleton" />
+          </div>
+        </div>
+      )}
     </>
   );
 }
