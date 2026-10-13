@@ -32,7 +32,7 @@ function Skeleton() {
 export default function ChatLoader({ variant = "dots", label }) {
   return (
     <div className="flex justify-start" role="status" aria-live="polite">
-      <div className="rounded-2xl rounded-bl-sm bg-slate-100 px-4 py-3 shadow-sm dark:bg-slate-800">
+      <div className="px-2 py-1">
         {variant === "skeleton" ? (
           <Skeleton />
         ) : (

@@ -14,36 +14,6 @@ export const DEMO_CHATS = [
       },
     ],
   },
-  {
-    id: "2",
-    title: "Local AI assistant",
-    messages: [
-      {
-        role: "user",
-        content: "How should I build my local AI agent?",
-      },
-      {
-        role: "assistant",
-        content:
-          "We can design the agent around local models, tools, permissions, memory, and a safe execution layer.",
-      },
-    ],
-  },
-  {
-    id: "3",
-    title: "MERN project",
-    messages: [
-      {
-        role: "user",
-        content: "Check my project structure",
-      },
-      {
-        role: "assistant",
-        content:
-          "I can inspect your project and help you understand how the different parts connect.",
-      },
-    ],
-  },
 ];
 
 export const DEMO_TRACE = [
