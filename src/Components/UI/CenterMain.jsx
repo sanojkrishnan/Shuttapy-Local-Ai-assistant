@@ -11,6 +11,7 @@ function CenterMain({
   chat,
   addMessages,
   setShowConfirmation,
+  createNewChat,
 }) {
   const scrollRef = useRef(null); // the scrolling container
   const messagesEndRef = useRef(null); // bottom of the messages
@@ -75,6 +76,8 @@ function CenterMain({
           addMessages={addMessages}
           showScrollBtn={!atBottom}
           onScrollToBottom={scrollToBottom}
+          chat={chat}
+          createNewChat={createNewChat}
         />
       </main>
     </>

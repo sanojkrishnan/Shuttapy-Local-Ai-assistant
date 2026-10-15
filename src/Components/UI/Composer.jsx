@@ -13,6 +13,8 @@ function Composer({
   addMessages,
   showScrollBtn,
   onScrollToBottom,
+  chat,
+  createNewChat,
 }) {
   const [listening, setListening] = useState(false);
   const [speak, setSpeak] = useState(false);
@@ -21,7 +23,7 @@ function Composer({
   const taRef = useRef(null);
 
   const { handleFileSelect, removeFile, handleSend, files, text, setText } =
-    useFileMethods({ addMessages }); //useFileMethods is a custom hook that handles file selection and removal, as well as sending messages with files attached.
+    useFileMethods({ chat, createNewChat, addMessages }); //useFileMethods is a custom hook that handles file selection and removal, as well as sending messages with files attached.
 
   useEffect(() => {
     const el = taRef.current;

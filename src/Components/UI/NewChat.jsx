@@ -1,8 +1,4 @@
-import {
-  speak,
-  stopSpeaking,
-  useShuttapyState,
-} from "../../Hooks/useShuttapyState";
+import { useShuttapyState } from "../../Hooks/useShuttapyState";
 import { HEAD, MUTE } from "../../Utils/UIElements";
 import ShuttapyMascot from "./ShuttapyMascot";
 //     import { setShuttapyGreeting } from "./hooks/useShuttapyState";
@@ -18,7 +14,7 @@ function NewChat({ chat, DefaultMode, mode }) {
   // setShuttapyGreeting(aiGreeting)
   return (
     <div className="flex flex-col items-center justify-center">
-      {chat.messages.length === 0 && (
+      {!chat && (
         <div
           className="
                   mx-auto mt-[9vh]

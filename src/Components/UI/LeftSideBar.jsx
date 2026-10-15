@@ -89,7 +89,7 @@ function LeftSideBar({
 
         {/* CHAT LIST */}
         <div>
-          <p className="mt-4 mb-2 flex">
+          <p className="mt-4 mb-2 pb-2 border-b-[0.5px] border-gray-300 dark:border-gray-700 flex">
             <Dot /> History
           </p>
 

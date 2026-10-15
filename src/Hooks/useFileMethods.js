@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchResponse } from "../redux/slice/messageSlice";
+import { fetchResponse, clearChatMessage } from "../redux/slice/messageSlice";
 
-export default function useFileMethods({ addMessages }) {
+export default function useFileMethods({ chat, createNewChat, addMessages }) {
   const [files, setFiles] = useState([]);
   const [text, setText] = useState("");
   const dispatch = useDispatch();
+
   const isChatMessageLoading = useSelector(
     (state) => state.messages.isChatMessageLoading,
   );
@@ -20,24 +21,39 @@ export default function useFileMethods({ addMessages }) {
 
   async function handleSend() {
     const content = text.trim();
+
     if (!content || isChatMessageLoading) return;
 
-    addMessages([{ role: "user", content }]);
+    const chatId = chat?.id ?? createNewChat();
+
+    // Show the user's message immediately.
+    addMessages(chatId, [{ role: "user", content }]);
+
     setText("");
     setFiles([]);
 
     try {
-      const res = await dispatch(fetchResponse({ message: content })).unwrap();
-      const reply = res?.reply ?? res;
+      const result = await dispatch(
+        fetchResponse({ message: content }),
+      ).unwrap();
 
-      addMessages([
+      const reply = result?.reply ?? result?.data?.reply ?? "";
+
+      if (!reply) {
+        throw new Error("Shuttapy returned an empty response.");
+      }
+
+      // Save the completed assistant response to chat history.
+      addMessages(chatId, [
         {
           role: "assistant",
-          content: typeof reply === "string" ? reply : JSON.stringify(reply),
+          content: reply,
         },
       ]);
-    } catch {
-      // errorMessage is already set by the slice; Composer's effect shows it
+
+      dispatch(clearChatMessage());
+    } catch (err) {
+      console.error("Send failed:", err);
     }
   }
 

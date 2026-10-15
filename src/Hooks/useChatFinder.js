@@ -1,32 +1,24 @@
 import { useState } from "react";
-import { DEMO_CHATS } from "../Utils/Demo";
 
 export default function useChatFinder() {
-  const [chats, setChats] = useState(DEMO_CHATS);
+  const [chats, setChats] = useState([]);
+  const [activeId, setActiveId] = useState(null);
 
-  const [activeId, setActiveId] = useState("1");
-
-  const chat = chats.find((c) => c.id === activeId) ?? chats[0]; //find the chat with the active id, if not found return the first chat
+  const chat = chats.find((c) => c.id === activeId) ?? null;
 
   function createNewChat() {
-    //this function creates a new chat object with a unique id, title, and empty messages array
-    const newChat = {
-      id: Date.now().toString(),
-      title: "New chat",
-      messages: [],
-    };
-
-    setChats((current) => [newChat, ...current]);
-
-    setActiveId(newChat.id);
+    const id = Date.now().toString();
+    setChats((current) => [{ id, title: "New chat", messages: [] }, ...current]);
+    setActiveId(id);
+    return id; // caller can use it immediately
   }
 
-  function addMessages(newMessages) {
-    const targetId = chat?.id; // `chat` already falls back to chats[0]
+  function addMessages(chatId, newMessages) {
+    if (!chatId || !newMessages?.length) return;
 
     setChats((current) =>
       current.map((c) =>
-        c.id === targetId
+        c.id === chatId
           ? {
               ...c,
               title:
@@ -40,13 +32,5 @@ export default function useChatFinder() {
     );
   }
 
-  return {
-    chats,
-    setChats,
-    activeId,
-    setActiveId,
-    chat,
-    createNewChat,
-    addMessages,
-  };
+  return { chats, setChats, activeId, setActiveId, chat, createNewChat, addMessages };
 }

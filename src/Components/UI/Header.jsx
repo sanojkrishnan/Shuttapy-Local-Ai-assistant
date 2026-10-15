@@ -79,7 +79,7 @@ function Header({ mode, setMode, DefaultMode }) {
           <i
             className={`
                 h-2 w-2 rounded-full
-                ${started ? "bg-emerald-500" : starting ? "bg-yellow-500 animate-pulse" : startingError ? "bg-[#ff811b] animate-pulse" : " bg-red-500 animate-pulse"}
+                ${started ? "bg-emerald-500" : starting ? "bg-amber-500 animate-pulse" : startingError ? "bg-orange-500 animate-pulse" : " bg-red-500 animate-pulse"}
               `}
           />
           {started

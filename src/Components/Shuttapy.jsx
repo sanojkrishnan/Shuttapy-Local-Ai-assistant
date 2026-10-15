@@ -61,6 +61,7 @@ export default function Shuttapy() {
         chat={chat}
         addMessages={addMessages}
         setShowConfirmation={setShowConfirmation}
+        createNewChat={createNewChat}
       />
 
       {/* RIGHT ACTIVITY PANEL */}

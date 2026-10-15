@@ -11,13 +11,13 @@ const initialState = {
   isChatMessageLoading: false,
 };
 
-// Fetch the cart for a specific user from backend
 export const fetchResponse = createAsyncThunk(
-  "response/fetch",
-  async ({ message }, { rejectWithValue }) => {
+  "message/fetchResponse",
+  async ({ message }, { rejectWithValue, dispatch }) => {
     try {
-      const response = await messageAPI.fetchResponse(message);
-      return response;
+      return await messageAPI.fetchResponse(message, (chunk) => {
+        dispatch(appendChatChunk(chunk));
+      });
     } catch (err) {
       return rejectWithValue(extractError(err, "Connection lost"));
     }
@@ -25,17 +25,25 @@ export const fetchResponse = createAsyncThunk(
 );
 
 const messageSlice = createSlice({
-  name: "coupon",
+  name: "message",
   initialState,
   reducers: {
+    appendChatChunk(state, action) {
+      state.chatMessage = (state.chatMessage || "") + action.payload;
+    },
+
     clearError(state) {
       state.errorMessage = null;
       state.logMessage = null;
     },
+
     clearState(state) {
       state.chatMessage = null;
       state.logMessage = null;
       state.permissionMessage = null;
+    },
+    clearChatMessage(state) {
+      state.chatMessage = "";
     },
   },
   extraReducers: (builder) => {
@@ -43,11 +51,18 @@ const messageSlice = createSlice({
       .addCase(fetchResponse.pending, (state) => {
         state.isChatMessageLoading = true;
         state.errorMessage = null;
+        state.chatMessage = "";
       })
       .addCase(fetchResponse.fulfilled, (state, action) => {
         state.isChatMessageLoading = false;
-        state.chatMessage = action.payload?.reply ?? action.payload;
-        state.permissionMessage = action.payload?.reply ?? action.payload;
+
+        // Keep the final complete reply as a fallback.
+        state.chatMessage =
+          action.payload?.reply ??
+          action.payload?.data?.reply ??
+          state.chatMessage;
+
+        state.permissionMessage = action.payload?.permission ?? null;
       })
       .addCase(fetchResponse.rejected, (state, action) => {
         state.isChatMessageLoading = false;
@@ -56,5 +71,7 @@ const messageSlice = createSlice({
   },
 });
 
-export const { clearError, clearState } = messageSlice.actions;
+export const { clearError, clearState, appendChatChunk, clearChatMessage } =
+  messageSlice.actions;
+
 export default messageSlice.reducer;
