@@ -57,9 +57,34 @@ export const api = {
     apiClient.post(url, formData, config).then((res) => res.data),
 
   // Generic streaming POST request
+  // Generic streaming POST request
   stream: async (url, data, onChunk, config = {}) => {
     const baseURL = apiClient.defaults.baseURL || "";
     const fullURL = `${baseURL.replace(/\/$/, "")}/${url.replace(/^\//, "")}`;
+
+    const controller = new AbortController();
+    const inactivityTimeout = config.timeout ?? 120000;
+    let timeoutId;
+    let timedOut = false;
+
+    const resetTimeout = () => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        timedOut = true;
+        controller.abort();
+      }, inactivityTimeout);
+    };
+
+    const externalSignal = config.signal;
+    const abortFromExternalSignal = () => controller.abort();
+
+    if (externalSignal?.aborted) {
+      controller.abort();
+    } else {
+      externalSignal?.addEventListener("abort", abortFromExternalSignal, {
+        once: true,
+      });
+    }
 
     const response = await fetch(fullURL, {
       method: "POST",
@@ -68,46 +93,68 @@ export const api = {
         ...config.headers,
       },
       body: JSON.stringify(data),
-      signal: config.signal ?? AbortSignal.timeout(config.timeout ?? 120000),
+      signal: controller.signal,
+    }).catch((error) => {
+      if (timedOut) {
+        throw new Error("Stream timed out because no response data arrived.");
+      }
+      throw error;
     });
 
-    if (!response.ok) {
-      const detail = await response.text();
-      throw new Error(detail || `Request failed: ${response.status}`);
-    }
-
-    if (!response.body) {
-      throw new Error("The server did not return a response stream.");
-    }
-
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder();
-    let fullReply = "";
-
     try {
-      while (true) {
-        const { value, done } = await reader.read();
+      if (!response.ok) {
+        const detail = await response.text();
+        throw new Error(detail || `Request failed: ${response.status}`);
+      }
 
-        if (done) break;
+      if (!response.body) {
+        throw new Error("The server did not return a response stream.");
+      }
 
-        const chunk = decoder.decode(value, { stream: true });
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let fullReply = "";
 
-        if (chunk) {
-          fullReply += chunk;
-          onChunk?.(chunk);
+      resetTimeout();
+
+      try {
+        while (true) {
+          const { value, done } = await reader.read();
+
+          if (done) break;
+
+          resetTimeout();
+
+          const chunk = decoder.decode(value, { stream: true });
+
+          if (chunk) {
+            fullReply += chunk;
+            onChunk?.(chunk);
+          }
         }
+
+        const remaining = decoder.decode();
+
+        if (remaining) {
+          fullReply += remaining;
+          onChunk?.(remaining);
+        }
+
+        return { reply: fullReply };
+      } catch (error) {
+        if (timedOut) {
+          throw new Error(
+            "Stream timed out because no new response data arrived.",
+          );
+        }
+        throw error;
+      } finally {
+        clearTimeout(timeoutId);
+        reader.releaseLock();
       }
-
-      const remaining = decoder.decode();
-
-      if (remaining) {
-        fullReply += remaining;
-        onChunk?.(remaining);
-      }
-
-      return { reply: fullReply };
     } finally {
-      reader.releaseLock();
+      clearTimeout(timeoutId);
+      externalSignal?.removeEventListener("abort", abortFromExternalSignal);
     }
   },
 };

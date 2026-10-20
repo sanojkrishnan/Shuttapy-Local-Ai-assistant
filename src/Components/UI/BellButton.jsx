@@ -213,7 +213,7 @@ function BellButton() {
                   className={`rounded-2xl border-2 p-3 dark:bg-white/10 shadow-lg backdrop-blur-sm bg-white/10  ${style.border}`}
                 >
                   <div className="flex items-start justify-between gap-2">
-                    <div className="flex items-center text-black gap-2 text-[13px] font-medium">
+                    <div className="flex items-center text-black dark:text-white gap-2 text-[13px] font-medium">
                       <Icon size={16} className={style.icon} />
                       {n.title}
                     </div>

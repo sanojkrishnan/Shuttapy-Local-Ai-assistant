@@ -1,17 +1,12 @@
 import { LINE, PANEL } from "../../Utils/UIElements";
-import Iris from "./Iris";
 import { useSelector } from "react-redux";
 import ChatLoading from "./ChatLoading";
 import useNotifications from "../../Hooks/useNotifications";
 import { useEffect } from "react";
 
 function Messages({ chat }) {
-  const {
-    permissionMessage,
-    errorMessage,
-    isChatMessageLoading,
-    chatMessage,
-  } = useSelector((state) => state.messages);
+  const { permissionMessage, errorMessage, isChatMessageLoading, chatMessage } =
+    useSelector((state) => state.messages);
 
   const { notify } = useNotifications();
   const messages = chat?.messages ?? [];
@@ -40,8 +35,6 @@ function Messages({ chat }) {
   function renderAssistantBubble(content, loading = false) {
     return (
       <div className="flex items-start gap-2.5">
-        <Iris think={loading} size={28} />
-
         <div
           className={`
             whitespace-pre-wrap
@@ -78,8 +71,6 @@ function Messages({ chat }) {
               isUser ? "justify-end" : ""
             }`}
           >
-            {!isUser && <Iris think={false} size={28} />}
-
             <div
               className={`
                 whitespace-pre-wrap
@@ -101,8 +92,7 @@ function Messages({ chat }) {
       })}
 
       {/* One temporary assistant bubble for the incoming stream. */}
-      {isChatMessageLoading &&
-        renderAssistantBubble(chatMessage, true)}
+      {isChatMessageLoading && renderAssistantBubble(chatMessage, true)}
     </>
   );
 }

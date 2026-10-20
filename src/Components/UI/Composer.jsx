@@ -39,7 +39,7 @@ function Composer({
     <>
       <div className="w-full ml-12 mb-4 px-5 pt-1.5">
         <div className="mx-auto w-full max-w-175">
-          <QuickActions DefaultMode={DefaultMode} setText={setText} />
+          {/* <QuickActions DefaultMode={DefaultMode} setText={setText} /> */}
           <FilePreview files={files} removeFile={removeFile} />
 
           {/* INPUT ROW: pr-14 leaves room for the chevron */}

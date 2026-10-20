@@ -45,7 +45,6 @@ export default function ChatLoader({ variant = "dots", label }) {
             )}
           </div>
         )}
-        <span className="sr-only">{label || "Assistant is responding"}</span>
       </div>
     </div>
   );

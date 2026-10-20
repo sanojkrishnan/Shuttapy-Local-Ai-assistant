@@ -32,15 +32,18 @@ function CenterMain({
   }
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({
+    const container = scrollRef.current;
+    if (!container) return;
+
+    container.scrollTo({
+      top: container.scrollHeight,
       behavior: "smooth",
-      block: "end",
     });
   }, [chat]);
 
   return (
     <>
-      <main className="flex min-h-0 min-w-0 flex-col items-center">
+      <main className="flex h-full min-h-0 min-w-0 flex-col items-center overflow-hidden">
         {/* HEADER */}
         <div className="w-full">
           <Header mode={mode} setMode={setMode} DefaultMode={DefaultMode} />

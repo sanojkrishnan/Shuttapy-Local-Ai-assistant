@@ -19,7 +19,9 @@ export default function Shuttapy() {
   return (
     <div
       className={`
-        grid h-screen grid-cols-1
+        overflow-hidden
+        h-dvh min-h-0
+        grid grid-cols-1
         font-['Instrument_Sans']
         text-[#1D1A3B]
         dark:text-[#EEEBFF]
@@ -51,7 +53,6 @@ export default function Shuttapy() {
         showConfirmation={showConfirmation}
         setShowConfirmation={setShowConfirmation}
       />
-      
 
       {/* CENTER */}
       <CenterMain
