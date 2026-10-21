@@ -172,15 +172,19 @@ function BellButton() {
 
   return (
     <div className="relative" ref={divRef}>
-      <Button onMouseDown={handleToggle}>
+      <Button
+        onMouseDown={handleToggle}
+        className="w-fit h-fit p-2"
+        title="Notifications"
+      >
         <div
           key={ringKey}
           className="relative flex items-center justify-center gap-2"
         >
-          <BellIcon
-            className={`${unread && notifications.length ? "fill-red-500 text-red-500" : ""} size-4 bellRing`}
-          />{" "}
-          Notifications
+          <span
+            className={`${unread && notifications.length ? "bg-red-500" : ""} absolute z-10 top-0 right-0 w-2 h-2 rounded-full`}
+          ></span>
+          <BellIcon className={` size-5 bellRing`} />
         </div>
       </Button>
 
@@ -189,7 +193,7 @@ function BellButton() {
           ref={panelRef}
           style={{ left: panelLeft }}
           className={`
-            fixed ml-4 top-20 z-10 w-80 h-screen p-3 flex flex-col gap-3
+            fixed ml-4 top-20 z-10 w-80 max-h-7/8 p-3 pb-5 flex flex-col gap-3
             rounded-2xl
             transition-all duration-300 ease-in-out overflow-auto custom-scrollbar
             ${
@@ -227,7 +231,9 @@ function BellButton() {
                     </button>
                   </div>
 
-                  <p className={`mt-2 text-[12px] leading-relaxed ${MUTE}`}>
+                  <p
+                    className={`mt-2 text-[12px] overflow-x-clip leading-relaxed ${MUTE}`}
+                  >
                     {n.message}
                   </p>
 

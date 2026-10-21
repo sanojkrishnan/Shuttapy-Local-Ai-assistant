@@ -7,6 +7,7 @@ import ShuttapyMascot from "./ShuttapyMascot";
 import BellButton from "./BellButton";
 import { useShuttapyState } from "../../Hooks/useShuttapyState";
 import ThemeToggle from "./ThemeToggle";
+import UpdateChecker from "./UpdateChecker";
 
 function LeftSideBar({
   chats,
@@ -46,7 +47,10 @@ function LeftSideBar({
 
         <div className="m-1 flex justify-between gap-3 items-center">
           <ThemeToggle />
-          <BellButton />
+          <div className="flex items-center justify-end gap-2">
+            <UpdateChecker />
+            <BellButton />
+          </div>
         </div>
 
         {/* MODES */}
