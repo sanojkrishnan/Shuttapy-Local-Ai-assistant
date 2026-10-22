@@ -4,12 +4,10 @@ import { iconBtn } from "../../TailwindElements/tailwindClass";
 import { LINE, PANEL } from "../../Utils/UIElements";
 import { useEffect, useRef, useState } from "react";
 import useFileMethods from "../../Hooks/useFileMethods";
-import QuickActions from "./QuickActions";
 import FilePreview from "./FilePreview";
 import { Button } from "./Button";
 
 function Composer({
-  DefaultMode,
   addMessages,
   showScrollBtn,
   onScrollToBottom,
@@ -24,6 +22,10 @@ function Composer({
 
   const { handleFileSelect, removeFile, handleSend, files, text, setText } =
     useFileMethods({ chat, createNewChat, addMessages }); //useFileMethods is a custom hook that handles file selection and removal, as well as sending messages with files attached.
+
+  useEffect(() => {
+    taRef.current?.focus();
+  }, []);
 
   useEffect(() => {
     const el = taRef.current;
